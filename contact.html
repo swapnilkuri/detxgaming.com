@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Contact — Detx Gaming</title>
+  <link rel="stylesheet" href="./assets/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container nav">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div data-brand>Detx Gaming</div>
+      </div>
+      <nav class="navLinks">
+        <a data-nav href="index.html">Home</a>
+        <a data-nav href="watch.html">Watch</a>
+        <a data-nav href="courses.html">Courses</a>
+        <a data-nav href="shop.html">Shop</a>
+        <a data-nav href="contact.html">Contact</a>
+        <a data-nav href="login.html" class="btn ghost">Login</a>
+        <a data-nav href="login.html?mode=signup" class="btn primary">Sign Up</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="sectionHead">
+        <div>
+          <h2>Contact</h2>
+          <p class="muted">Send a message. We’ll reply.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="panel">
+          <h3 style="margin:0 0 10px">Message</h3>
+          <form id="contactForm">
+            <div class="row">
+              <div>
+                <label class="muted">Name</label>
+                <input id="cName" class="input" required/>
+              </div>
+              <div>
+                <label class="muted">Email</label>
+                <input id="cEmail" type="email" class="input" required/>
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <label class="muted">Subject</label>
+              <input id="cSubject" class="input" required/>
+            </div>
+            <div style="margin-top:10px">
+              <label class="muted">Message</label>
+              <textarea id="cMessage" class="input" rows="6" required></textarea>
+            </div>
+            <div class="ctaRow" style="margin-top:14px">
+              <button class="btn primary" type="submit">Send</button>
+              <a class="btn ghost" href="courses.html">Browse Courses</a>
+            </div>
+            <div id="contactStatus" class="muted" style="margin-top:10px"></div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h3 style="margin:0 0 10px">Platforms</h3>
+          <p class="muted">Follow & connect across your favorite platform.</p>
+          <div class="chips" data-socials></div>
+
+          <div style="height:14px"></div>
+          <div class="card" style="background: rgba(255,255,255,0.04)">
+            <div style="font-weight:900">Tip</div>
+            <div class="muted" style="margin-top:8px">
+              Add your WhatsApp / Discord link as the main “fast contact” for better conversions.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footerGrid">
+      <div>© <span id="year"></span> <span data-brand>Detx Gaming</span></div>
+      <div class="muted">Built for speed + trust.</div>
+    </div>
+  </footer>
+
+  <div class="stickyBar">
+    <a class="stickyBtn" href="courses.html">Courses</a>
+    <a class="stickyBtn primary" href="https://discord.gg/Mm74e4WHhU" target="_blank" rel="noopener">Join Discord</a>
+    <a class="stickyBtn" href="http://discordapp.com/users/794883241680044054" target="_blank" rel="noopener">DM Discord</a>
+  </div>
+
+  <script src="./assets/supabase.js"></script>
+  <script src="./assets/data.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>
+

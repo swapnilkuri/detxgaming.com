@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Success — Detx Gaming</title>
+  <link rel="stylesheet" href="./assets/style.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div data-brand>Detx Gaming</div>
+      </div>
+      <nav class="navLinks">
+        <a data-nav href="index.html">Home</a>
+        <a data-nav href="watch.html">Watch</a>
+        <a data-nav href="courses.html">Courses</a>
+        <a data-nav href="shop.html">Shop</a>
+        <a data-nav href="contact.html">Contact</a>
+        <a data-nav href="login.html" class="btn ghost">Login</a>
+        <a data-nav href="login.html?mode=signup" class="btn primary">Sign Up</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <div class="panel">
+        <h2 style="margin:0 0 8px;">✅ Submitted Successfully</h2>
+        <p class="muted" style="margin:0 0 14px;">
+          We received your request. Next: verification → access link.
+        </p>
+
+        <div class="card" style="background: rgba(255,255,255,0.04);">
+          <div style="font-weight:900;margin-bottom:8px;">Next steps</div>
+          <div class="muted">1) Join Discord (for fast response)</div>
+          <div class="muted">2) We verify your payment</div>
+          <div class="muted">3) We send your unlisted playlist link</div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+          <a class="btn primary" href="https://discord.gg/Mm74e4WHhU" target="_blank" rel="noopener">Join Discord</a>
+          <a class="btn" href="watch.html">Watch Videos</a>
+          <a class="btn ghost" href="courses.html">Explore Courses</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footerGrid">
+      <div>© <span id="year"></span> <span data-brand>Detx Gaming</span></div>
+      <div class="muted">Keep posting. Keep improving.</div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    document.querySelectorAll("[data-brand]").forEach(el => el.textContent = (window.DETX?.brand?.name || "Detx Gaming"));
+  </script>
+</body>
+</html>
+

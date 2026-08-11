@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Detx Gaming</title>
+  <link rel="stylesheet" href="./assets/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="topbar">
+    <div class="container nav">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div>Detx Gaming</div>
+      </div>
+      <nav class="navLinks">
+        <a data-nav href="index.html" class="active">Home</a>
+        <a data-nav href="watch.html">Watch</a>
+        <a data-nav href="courses.html">Courses</a>
+        <a data-nav href="shop.html">Shop</a>
+        <a data-nav href="contact.html">Contact</a>
+        <a data-nav href="login.html" class="btn ghost">Login</a>
+        <a data-nav href="login.html?mode=signup" class="btn primary">Sign Up</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div data-urgency></div>
+
+    <section class="section">
+      <div class="panel">
+        <h2 style="margin:0 0 8px;">Sell courses. Build audience. Make gaming a career.</h2>
+        <p class="muted" style="margin:0 0 14px;">
+          Small, practical courses for creators who want growth — not theory.
+        </p>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a class="btn primary" href="courses.html">See Courses (50% OFF)</a>
+          <a class="btn" href="watch.html">Watch Videos</a>
+          <a class="btn ghost" href="https://discord.gg/Mm74e4WHhU" target="_blank" rel="noopener">Join Discord</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="sectionHead">
+        <h2>Featured Courses</h2>
+        <a class="btn ghost" href="courses.html">View All</a>
+      </div>
+      <div class="grid" data-featured-courses></div>
+    </section>
+  </main>
+
+  <div class="stickyBar">
+    <a class="stickyBtn" href="courses.html">Courses</a>
+    <a class="stickyBtn primary" href="https://discord.gg/Mm74e4WHhU" target="_blank" rel="noopener">Join Discord</a>
+    <a class="stickyBtn" href="https://www.youtube.com/@detxgamingyt" target="_blank" rel="noopener">YouTube</a>
+  </div>
+
+  <footer class="footer">
+    <div class="container footerGrid">
+      <div>© <span id="year"></span> <span>Detx Gaming</span> | <a href="/admin/index.html" style="color:#f59e0b; text-decoration:underline;">Admin CMS</a></div>
+      <div class="chips" data-socials></div>
+    </div>
+  </footer>
+
+  <script src="./assets/supabase.js"></script>
+  <script src="./assets/data.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>

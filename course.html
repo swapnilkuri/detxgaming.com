@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Course — Detx Gaming</title>
+  <link rel="stylesheet" href="./assets/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container nav">
+      <div class="brand">
+        <div class="logoDot"></div>
+        <div data-brand>Detx Gaming</div>
+      </div>
+      <nav class="navLinks">
+        <a data-nav href="index.html">Home</a>
+        <a data-nav href="watch.html">Watch</a>
+        <a data-nav href="courses.html">Courses</a>
+        <a data-nav href="shop.html">Shop</a>
+        <a data-nav href="contact.html">Contact</a>
+        <a data-nav href="login.html" class="btn ghost">Login</a>
+        <a data-nav href="login.html?mode=signup" class="btn primary">Sign Up</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div data-urgency></div>
+
+    <section class="section" data-course-detail>
+      <div class="panel">
+        <div class="courseThumb" data-course-thumb style="margin-bottom:14px;"></div>
+
+        <div class="badgeRow">
+          <span class="badge" data-course-track></span>
+          <span class="muted" style="font-size:12px;">
+            <span data-course-level></span> • <span data-course-duration></span>
+          </span>
+        </div>
+
+        <h2 style="margin:10px 0 6px;" data-course-title></h2>
+        <p class="muted" style="margin:0 0 12px;" data-course-desc></p>
+        <p style="margin:0 0 12px;"><b>Outcome:</b> <span class="muted" data-course-outcome></span></p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <div class="price">
+            <span class="old" data-course-old></span>
+            <span class="new" data-course-new></span>
+          </div>
+          <a class="btn primary" id="instantBuyBtn" href="#" target="_blank" rel="noopener">Instant Buy (Auto Access)</a>
+          <button class="btn ghost" id="enrollBtn">Pay Manually (Bkash/Nagad/etc.)</button>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <div style="font-weight:900;margin-bottom:8px;">What you get</div>
+          <ul class="muted" style="margin:0;padding-left:18px;" data-course-includes></ul>
+        </div>
+
+        <div class="card" style="margin-top:12px; background: rgba(255,255,255,0.04);">
+          <div style="font-weight:900;margin-bottom:6px;">Delivery & Support</div>
+          <div class="muted" data-course-delivery></div>
+          <div class="muted" style="margin-top:6px;" data-course-support></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footerGrid">
+      <div>© <span id="year"></span> <span data-brand>Detx Gaming</span></div>
+      <div class="chips" data-socials></div>
+    </div>
+  </footer>
+
+  <!-- Manual Pay Modal -->
+  <div class="modal" id="enrollModal">
+    <div class="modalBox">
+      <div class="modalHead">
+        <div>
+          <div class="muted" style="font-size:12px;">Manual payment request</div>
+          <h3 class="modalTitle" id="modalCourseTitle">Course</h3>
+          <div class="muted" style="margin-top:6px;">
+            <span style="text-decoration:line-through;opacity:.7;" id="modalPriceOld"></span>
+            <b id="modalPriceNew"></b>
+          </div>
+        </div>
+        <button class="modalClose" data-modal-close>Close</button>
+      </div>
+
+      <div class="modalBody">
+        <form id="enrollForm">
+          <div class="row">
+            <div>
+              <label class="muted">Name</label>
+              <input class="input" id="fullName" required />
+            </div>
+            <div>
+              <label class="muted">Country</label>
+              <input class="input" id="country" required />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div>
+              <label class="muted">Email</label>
+              <input class="input" id="email" type="email" required />
+            </div>
+            <div>
+              <label class="muted">Contact Number</label>
+              <input class="input" id="phone" required />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div>
+              <label class="muted">Payment Method</label>
+              <select class="input" id="paymentMethod" required>
+                <option value="">Select</option>
+                <option>Bkash</option>
+                <option>Nagad</option>
+                <option>Rocket</option>
+                <option>Bank</option>
+                <option>Card</option>
+                <option>PayPal</option>
+              </select>
+            </div>
+            <div>
+              <label class="muted">Transaction ID (optional)</label>
+              <input class="input" id="transactionId" />
+            </div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <label class="muted">Payment Screenshot (optional)</label>
+            <input class="input" id="paymentScreenshot" type="file" accept="image/*" />
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn primary" type="submit">Submit Manual Payment</button>
+            <a class="btn ghost" href="https://discord.gg/Mm74e4WHhU" target="_blank" rel="noopener">Join Discord</a>
+          </div>
+
+          <div class="muted" id="enrollStatus" style="margin-top:10px;"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="stickyBar">
+    <a class="stickyBtn" href="courses.html">Courses</a>
+    <a class="stickyBtn primary" href="https://discord.gg/Mm74e4WHhU" target="_blank" rel="noopener">Join Discord</a>
+    <a class="stickyBtn" href="https://discordapp.com/users/794883241680044054" target="_blank" rel="noopener">DM</a>
+  </div>
+
+  <script src="./assets/supabase.js"></script>
+  <script src="./assets/data.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>
