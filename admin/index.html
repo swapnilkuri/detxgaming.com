@@ -3,102 +3,278 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CMS Admin Dashboard</title>
+  <title>Detx Gaming</title>
   <link rel="stylesheet" href="../assets/style.css">
   <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-black text-white min-h-screen p-6">
+<body class="bg-black text-gray-200 min-h-screen flex">
 
-  <!-- Header -->
-  <header class="mb-8 border-b border-zinc-800 pb-4">
-    <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">CMS Admin</span>
-    <h1 class="text-3xl font-bold text-white mt-1">Dashboard Manager</h1>
-  </header>
+  <!-- LEFT SIDEBAR NAVIGATION -->
+  <aside class="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col justify-between h-screen fixed left-0 top-0 bottom-0 z-30">
+    <div>
+      <!-- Brand Header -->
+      <div class="p-6 border-b border-zinc-800">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest block">CMS ADMIN</span>
+        <h1 class="text-xl font-bold text-white mt-1">DetxGaming Admin</h1>
+      </div>
 
-  <!-- Navigation Tabs -->
-  <div class="flex gap-4 border-b border-zinc-800 mb-6">
-    <button onclick="switchTab('enrollments')" id="btn-enrollments" class="tab-btn pb-2 text-yellow-400 border-b-2 border-yellow-400 font-semibold">
-      Enrollments
-    </button>
-    <button onclick="switchTab('courses')" id="btn-courses" class="tab-btn pb-2 text-gray-400 hover:text-white font-semibold">
-      Courses
-    </button>
-    <button onclick="switchTab('messages')" id="btn-messages" class="tab-btn pb-2 text-gray-400 hover:text-white font-semibold">
-      Messages
-    </button>
-  </div>
-
-  <!-- Tab 1: Enrollments Section -->
-  <section id="tab-enrollments" class="tab-content">
-    <h2 class="text-xl font-bold mb-4">Student Enrollments</h2>
-    <div class="overflow-x-auto bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-      <table class="w-full text-left text-sm text-gray-300">
-        <thead class="text-xs uppercase bg-zinc-800 text-yellow-400">
-          <tr>
-            <th class="p-3">Name</th>
-            <th class="p-3">Email</th>
-            <th class="p-3">Phone</th>
-            <th class="p-3">Course</th>
-            <th class="p-3">Payment</th>
-          </tr>
-        </thead>
-        <tbody id="enrollments-list">
-          <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading enrollments...</td></tr>
-        </tbody>
-      </table>
+      <!-- Navigation Links -->
+      <nav class="p-4 space-y-1 text-sm font-medium">
+        <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-yellow-400 bg-zinc-900 border-l-2 border-yellow-400 font-semibold">
+          📊 <span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('courses')" id="btn-courses" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          📚 <span>Courses</span>
+        </button>
+        <button onclick="switchTab('categories')" id="btn-categories" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          🏷️ <span>Categories</span>
+        </button>
+        <button onclick="switchTab('orders')" id="btn-orders" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          📦 <span>Orders</span>
+        </button>
+        <button onclick="switchTab('sales')" id="btn-sales" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          💰 <span>Sales</span>
+        </button>
+        <button onclick="switchTab('customers')" id="btn-customers" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          👥 <span>Customers</span>
+        </button>
+        <button onclick="switchTab('coupons')" id="btn-coupons" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          🎟️ <span>Coupons</span>
+        </button>
+        <button onclick="switchTab('cms')" id="btn-cms" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          📝 <span>CMS Content</span>
+        </button>
+        <button onclick="switchTab('reviews')" id="btn-reviews" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          ⭐ <span>Reviews</span>
+        </button>
+        <button onclick="switchTab('messages')" id="btn-messages" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          📬 <span>Messages</span>
+        </button>
+        <button onclick="switchTab('settings')" id="btn-settings" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-gray-400 hover:text-white hover:bg-zinc-900/60 transition">
+          ⚙️ <span>Settings</span>
+        </button>
+      </nav>
     </div>
-  </section>
 
-  <!-- Tab 2: Course Manager Section -->
-  <section id="tab-courses" class="tab-content hidden">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold">Manage Courses</h2>
-      <button onclick="toggleCourseForm()" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg text-sm">
-        + Add New Course
+    <!-- Bottom Logout -->
+    <div class="p-4 border-t border-zinc-800">
+      <button onclick="handleAdminLogout()" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg flex items-center gap-2 transition">
+        🚪 Logout
       </button>
     </div>
+  </aside>
 
-    <!-- Add Course Form -->
-    <form id="course-form" class="hidden bg-zinc-900 border border-zinc-800 p-6 rounded-xl mb-6 space-y-4">
-      <h3 class="text-lg font-bold text-yellow-400">Add New Course</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input type="text" id="course-title" placeholder="Course Title" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
-        <input type="text" id="course-slug" placeholder="Slug (e.g. youtube-mastery)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
-        <input type="number" id="course-price" placeholder="Price (₹)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
-        <input type="text" id="course-thumb" placeholder="Thumbnail URL (e.g. assets/courses/1-minute-thumbnail-method.png)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
+  <!-- MAIN DASHBOARD CONTENT AREA -->
+  <main class="flex-1 ml-64 p-8 min-h-screen bg-black">
+
+    <!-- Tab 1: Dashboard Overview -->
+    <section id="tab-dashboard" class="tab-content">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Admin Overview</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Dashboard</h2>
+        <p class="text-sm text-gray-400">Monitor revenue, orders, and customer activity across your platform.</p>
       </div>
-      <textarea id="course-desc" placeholder="Course Description" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" rows="3" required></textarea>
-      <button type="submit" class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-lg">Save Course</button>
-    </form>
 
-    <div id="courses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Dynamic courses load here -->
-    </div>
-  </section>
+      <!-- Metric Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+          <span class="text-xs font-semibold text-gray-400 uppercase">Total Revenue</span>
+          <div id="metric-revenue" class="text-3xl font-bold text-yellow-400 mt-2">BDT 0</div>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+          <span class="text-xs font-semibold text-gray-400 uppercase">Total Orders</span>
+          <div id="metric-orders" class="text-3xl font-bold text-white mt-2">0</div>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+          <span class="text-xs font-semibold text-gray-400 uppercase">Total Customers</span>
+          <div id="metric-customers" class="text-3xl font-bold text-white mt-2">0</div>
+        </div>
+      </div>
+    </section>
 
-  <!-- Tab 3: Messages Section -->
-  <section id="tab-messages" class="tab-content hidden">
-    <h2 class="text-xl font-bold mb-4">Contact Messages</h2>
-    <div class="overflow-x-auto bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-      <table class="w-full text-left text-sm text-gray-300">
-        <thead class="text-xs uppercase bg-zinc-800 text-yellow-400">
-          <tr>
-            <th class="p-3">Name</th>
-            <th class="p-3">Email</th>
-            <th class="p-3">Subject</th>
-            <th class="p-3">Message</th>
-          </tr>
-        </thead>
-        <tbody id="messages-list">
-          <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading messages...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <!-- Tab 2: Courses Manager -->
+    <section id="tab-courses" class="tab-content hidden">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Catalog</span>
+          <h2 class="text-3xl font-bold text-white mt-1">Manage Courses</h2>
+        </div>
+        <button onclick="toggleCourseForm()" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg text-sm transition">
+          + Add New Course
+        </button>
+      </div>
+
+      <!-- Add Course Form -->
+      <form id="course-form" class="hidden bg-zinc-900 border border-zinc-800 p-6 rounded-xl mb-6 space-y-4">
+        <h3 class="text-lg font-bold text-yellow-400">Add New Course</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" id="course-title" placeholder="Course Title" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
+          <input type="text" id="course-slug" placeholder="Slug (e.g. youtube-mastery)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
+          <input type="number" id="course-price" placeholder="Price (৳)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
+          <input type="text" id="course-thumb" placeholder="Thumbnail URL (e.g. assets/courses/1-minute-thumbnail-method.png)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
+        </div>
+        <textarea id="course-desc" placeholder="Course Description" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" rows="3" required></textarea>
+        <button type="submit" class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-lg hover:bg-yellow-400 transition">Save Course</button>
+      </form>
+
+      <div id="courses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <p class="text-gray-500">Loading courses...</p>
+      </div>
+    </section>
+
+    <!-- Tab 3: Categories -->
+    <section id="tab-categories" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Catalog Structure</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Categories & Tracks</h2>
+      </div>
+      <div id="categories-list" class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+        <p class="text-gray-500">Manage course categories and tracks.</p>
+      </div>
+    </section>
+
+    <!-- Tab 4: Orders Queue -->
+    <section id="tab-orders" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Sales Operations</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Orders Queue</h2>
+      </div>
+      <div class="overflow-x-auto bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <table class="w-full text-left text-sm text-gray-300">
+          <thead class="text-xs uppercase bg-zinc-800 text-yellow-400">
+            <tr>
+              <th class="p-3">Customer</th>
+              <th class="p-3">Email</th>
+              <th class="p-3">Phone</th>
+              <th class="p-3">Course</th>
+              <th class="p-3">Payment</th>
+            </tr>
+          </thead>
+          <tbody id="enrollments-list">
+            <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading orders...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 5: Sales Ledger -->
+    <section id="tab-sales" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Financials</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Sales Ledger</h2>
+      </div>
+      <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+        <p class="text-gray-400">Track paid transactions and settled invoices.</p>
+      </div>
+    </section>
+
+    <!-- Tab 6: Customers Directory -->
+    <section id="tab-customers" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Customer Insight</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Customer Directory</h2>
+      </div>
+      <div class="overflow-x-auto bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <table class="w-full text-left text-sm text-gray-300">
+          <thead class="text-xs uppercase bg-zinc-800 text-yellow-400">
+            <tr>
+              <th class="p-3">Customer</th>
+              <th class="p-3">Contact</th>
+              <th class="p-3">Orders</th>
+              <th class="p-3">Spent</th>
+              <th class="p-3">City</th>
+              <th class="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="customers-list">
+            <tr><td colspan="6" class="p-4 text-center text-gray-500">Loading customers...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 7: Coupons Manager -->
+    <section id="tab-coupons" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Marketing</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Coupons</h2>
+      </div>
+      <div id="coupons-list" class="space-y-4">
+        <p class="text-gray-500">Loading coupons...</p>
+      </div>
+    </section>
+
+    <!-- Tab 8: CMS Content -->
+    <section id="tab-cms" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">CMS</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Site Content Manager</h2>
+      </div>
+      <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+        <p class="text-gray-400">Edit homepage text, banners, and promotional sections.</p>
+      </div>
+    </section>
+
+    <!-- Tab 9: Reviews Moderation -->
+    <section id="tab-reviews" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Social Proof</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Customer Reviews</h2>
+      </div>
+      <div id="reviews-list" class="space-y-4">
+        <p class="text-gray-500">Loading reviews...</p>
+      </div>
+    </section>
+
+    <!-- Tab 10: Messages -->
+    <section id="tab-messages" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Inquiries</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Contact Messages</h2>
+      </div>
+      <div class="overflow-x-auto bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+        <table class="w-full text-left text-sm text-gray-300">
+          <thead class="text-xs uppercase bg-zinc-800 text-yellow-400">
+            <tr>
+              <th class="p-3">Name</th>
+              <th class="p-3">Email</th>
+              <th class="p-3">Subject</th>
+              <th class="p-3">Message</th>
+            </tr>
+          </thead>
+          <tbody id="messages-list">
+            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading messages...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 11: Settings -->
+    <section id="tab-settings" class="tab-content hidden">
+      <div class="mb-6">
+        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Configuration</span>
+        <h2 class="text-3xl font-bold text-white mt-1">Store Settings</h2>
+      </div>
+      <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl space-y-4 max-w-xl">
+        <div>
+          <label class="block text-xs uppercase text-gray-400 mb-1">Store Name</label>
+          <input type="text" value="Detx Gaming" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
+        </div>
+        <div>
+          <label class="block text-xs uppercase text-gray-400 mb-1">Support Email</label>
+          <input type="email" value="swapnil7kuri@gmail.com" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
+        </div>
+        <button class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 py-2 rounded-lg transition">
+          Save Settings
+        </button>
+      </div>
+    </section>
+
+  </main>
 
   <script src="../assets/supabase.js"></script>
-  <script src="../assets/admin.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
