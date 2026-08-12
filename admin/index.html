@@ -5,22 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detx Gaming - Castle Admin</title>
   <link rel="stylesheet" href="../assets/style.css">
-  <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../assets/data.js"></script>
 </head>
 <body class="bg-black text-gray-200 min-h-screen flex">
 
   <!-- LEFT SIDEBAR NAVIGATION -->
   <aside class="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col justify-between h-screen fixed left-0 top-0 bottom-0 z-30">
     <div>
-      <!-- Brand Header -->
       <div class="p-6 border-b border-zinc-800">
         <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest block">CMS ADMIN</span>
         <h1 class="text-xl font-bold text-white mt-1">DetxGaming Admin</h1>
       </div>
 
-      <!-- Navigation Links -->
       <nav class="p-4 space-y-1 text-sm font-medium">
         <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-yellow-400 bg-zinc-900 border-l-2 border-yellow-400 font-semibold">
           📊 <span>Dashboard</span>
@@ -58,7 +56,6 @@
       </nav>
     </div>
 
-    <!-- Bottom Logout -->
     <div class="p-4 border-t border-zinc-800">
       <button onclick="handleAdminLogout()" class="w-full text-left px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg flex items-center gap-2 transition">
         🚪 Logout
@@ -66,18 +63,22 @@
     </div>
   </aside>
 
-  <!-- MAIN DASHBOARD CONTENT AREA -->
+  <!-- MAIN CONTENT AREA -->
   <main class="flex-1 ml-64 p-8 min-h-screen bg-black">
 
     <!-- Tab 1: Dashboard Overview -->
     <section id="tab-dashboard" class="tab-content">
-      <div class="mb-6">
-        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Admin Overview</span>
-        <h2 class="text-3xl font-bold text-white mt-1">Dashboard</h2>
-        <p class="text-sm text-gray-400">Monitor revenue, orders, and customer activity across your platform.</p>
+      <div class="mb-6 flex justify-between items-end">
+        <div>
+          <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Admin Overview</span>
+          <h2 class="text-3xl font-bold text-white mt-1">Dashboard</h2>
+          <p class="text-sm text-gray-400">Monitor revenue, orders, and customer activity across your platform.</p>
+        </div>
+        <button onclick="syncLocalCoursesToDatabase()" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-yellow-400 text-xs font-semibold px-4 py-2 rounded-lg transition">
+          ⚡ Sync 12 Local Courses to Database
+        </button>
       </div>
 
-      <!-- Metric Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
           <span class="text-xs font-semibold text-gray-400 uppercase">Total Revenue</span>
@@ -101,19 +102,23 @@
           <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Catalog</span>
           <h2 class="text-3xl font-bold text-white mt-1">Manage Courses</h2>
         </div>
-        <button onclick="toggleCourseForm()" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg text-sm transition">
-          + Add New Course
-        </button>
+        <div class="flex gap-2">
+          <button onclick="syncLocalCoursesToDatabase()" class="bg-zinc-800 hover:bg-zinc-700 text-yellow-400 font-semibold px-4 py-2 rounded-lg text-sm border border-zinc-700">
+            Import Local Courses
+          </button>
+          <button onclick="toggleCourseForm()" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg text-sm transition">
+            + Add New Course
+          </button>
+        </div>
       </div>
 
-      <!-- Add Course Form -->
       <form id="course-form" class="hidden bg-zinc-900 border border-zinc-800 p-6 rounded-xl mb-6 space-y-4">
         <h3 class="text-lg font-bold text-yellow-400">Add New Course</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input type="text" id="course-title" placeholder="Course Title" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
           <input type="text" id="course-slug" placeholder="Slug (e.g. youtube-mastery)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
           <input type="number" id="course-price" placeholder="Price (৳)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
-          <input type="text" id="course-thumb" placeholder="Thumbnail URL (e.g. assets/courses/1-minute-thumbnail-method.png)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
+          <input type="text" id="course-thumb" placeholder="Thumbnail Path (/assets/courses/file.png)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
         </div>
         <textarea id="course-desc" placeholder="Course Description" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" rows="3" required></textarea>
         <button type="submit" class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-lg hover:bg-yellow-400 transition">Save Course</button>
@@ -126,12 +131,25 @@
 
     <!-- Tab 3: Categories -->
     <section id="tab-categories" class="tab-content hidden">
-      <div class="mb-6">
-        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Catalog Structure</span>
-        <h2 class="text-3xl font-bold text-white mt-1">Categories & Tracks</h2>
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Catalog Structure</span>
+          <h2 class="text-3xl font-bold text-white mt-1">Categories & Tracks</h2>
+        </div>
+        <button onclick="document.getElementById('category-form').classList.toggle('hidden')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg text-sm">
+          + Add Category
+        </button>
       </div>
-      <div id="categories-list" class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
-        <p class="text-gray-500">Manage course categories and tracks.</p>
+
+      <form id="category-form" class="hidden bg-zinc-900 border border-zinc-800 p-6 rounded-xl mb-6 space-y-4 max-w-xl">
+        <h3 class="text-lg font-bold text-yellow-400">Add New Category</h3>
+        <input type="text" id="category-name" placeholder="Category Name (e.g. Editing)" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" required />
+        <input type="text" id="category-slug" placeholder="Category Slug (e.g. editing)" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" required />
+        <button type="submit" class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-lg">Save Category</button>
+      </form>
+
+      <div id="categories-list" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <p class="text-gray-500">Loading categories...</p>
       </div>
     </section>
 
@@ -197,24 +215,57 @@
 
     <!-- Tab 7: Coupons Manager -->
     <section id="tab-coupons" class="tab-content hidden">
-      <div class="mb-6">
-        <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Marketing</span>
-        <h2 class="text-3xl font-bold text-white mt-1">Coupons</h2>
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Marketing</span>
+          <h2 class="text-3xl font-bold text-white mt-1">Coupons</h2>
+        </div>
+        <button onclick="document.getElementById('coupon-form').classList.toggle('hidden')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg text-sm">
+          + Create Coupon
+        </button>
       </div>
+
+      <form id="coupon-form" class="hidden bg-zinc-900 border border-zinc-800 p-6 rounded-xl mb-6 space-y-4 max-w-xl">
+        <h3 class="text-lg font-bold text-yellow-400">Create Promotional Coupon</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <input type="text" id="coupon-code" placeholder="Code (e.g. CREATOR50)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
+          <select id="coupon-type" class="bg-black border border-zinc-700 p-3 rounded text-white">
+            <option value="Percent">Percent (%)</option>
+            <option value="Fixed">Fixed Amount (৳)</option>
+          </select>
+          <input type="number" id="coupon-value" placeholder="Value (e.g. 50 or 200)" class="bg-black border border-zinc-700 p-3 rounded text-white" required />
+          <input type="number" id="coupon-min" placeholder="Min Spend (৳)" class="bg-black border border-zinc-700 p-3 rounded text-white" value="0" />
+        </div>
+        <button type="submit" class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-lg">Save Coupon</button>
+      </form>
+
       <div id="coupons-list" class="space-y-4">
         <p class="text-gray-500">Loading coupons...</p>
       </div>
     </section>
 
-    <!-- Tab 8: CMS Content -->
+    <!-- Tab 8: CMS Content Manager -->
     <section id="tab-cms" class="tab-content hidden">
       <div class="mb-6">
         <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">CMS</span>
         <h2 class="text-3xl font-bold text-white mt-1">Site Content Manager</h2>
       </div>
-      <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
-        <p class="text-gray-400">Edit homepage text, banners, and promotional sections.</p>
-      </div>
+      <form id="cms-form" class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl space-y-4 max-w-2xl">
+        <h3 class="text-lg font-bold text-yellow-400">Homepage Text Settings</h3>
+        <div>
+          <label class="block text-xs uppercase text-gray-400 mb-1">Hero Title</label>
+          <input type="text" id="cms-hero-title" value="Sell courses. Build audience. Make gaming a career." class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
+        </div>
+        <div>
+          <label class="block text-xs uppercase text-gray-400 mb-1">Hero Tagline</label>
+          <input type="text" id="cms-hero-tagline" value="Small, practical courses for creators who want growth — not theory." class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
+        </div>
+        <div>
+          <label class="block text-xs uppercase text-gray-400 mb-1">Sale Announcement Banner</label>
+          <input type="text" id="cms-banner" value="🔥 50% OFF Creator Sale" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
+        </div>
+        <button type="submit" class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-lg">Update Homepage CMS</button>
+      </form>
     </section>
 
     <!-- Tab 9: Reviews Moderation -->
@@ -257,19 +308,23 @@
         <span class="text-yellow-500 font-bold text-xs uppercase tracking-widest">Configuration</span>
         <h2 class="text-3xl font-bold text-white mt-1">Store Settings</h2>
       </div>
-      <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl space-y-4 max-w-xl">
+      <form id="settings-form" class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl space-y-4 max-w-xl">
         <div>
           <label class="block text-xs uppercase text-gray-400 mb-1">Store Name</label>
-          <input type="text" value="Detx Gaming" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
+          <input type="text" id="setting-store-name" value="Detx Gaming" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
         </div>
         <div>
           <label class="block text-xs uppercase text-gray-400 mb-1">Support Email</label>
-          <input type="email" value="swapnil7kuri@gmail.com" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
+          <input type="email" id="setting-email" value="swapnil7kuri@gmail.com" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
         </div>
-        <button class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 py-2 rounded-lg transition">
+        <div>
+          <label class="block text-xs uppercase text-gray-400 mb-1">bKash / Nagad Number</label>
+          <input type="text" id="setting-bkash" value="01735753447" class="w-full bg-black border border-zinc-700 p-3 rounded text-white" />
+        </div>
+        <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 py-2 rounded-lg transition">
           Save Settings
         </button>
-      </div>
+      </form>
     </section>
 
   </main>
