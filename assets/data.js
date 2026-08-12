@@ -29,7 +29,8 @@ window.DETX = {
     shortsPlaylistId: "PL2gip3RqVaHdB5EBHCt1SPG_4ifssHVIT",
     livePlaylistId: "PL2gip3RqVaHfKpGTDwUsNpjsT5wRRcf_6",
   },
-courses: [
+
+  courses: [
     {
       id: "yt-journey-starter",
       track: "YouTube Starter",
@@ -184,8 +185,117 @@ courses: [
       support: "Discord support community included",
       checkoutUrl: "https://PAYHIP_OR_GUMROAD_LINK_HERE"
     },
+    {
+      id: "fb-growth-engine",
+      track: "Facebook Growth",
+      level: "Beginner",
+      duration: "1.2 hours",
+      badge: "Explode Reach",
+      title: "Facebook Growth Engine for Gaming",
+      image: "/assets/courses/facebook-growth-engine.png",
+      outcome: "Explode your reach and build an active gaming community on Facebook.",
+      description: "Master Facebook gaming page strategies, video distribution, and fan community building.",
+      originalPrice: 1199,
+      discountPrice: 599,
+      includes: [
+        "Facebook algorithm rules",
+        "Page setup & optimization",
+        "Cross-posting pipeline",
+        "Community engagement hacks",
+      ],
+      delivery: "Instant access (Unlisted YouTube playlist) after checkout",
+      support: "Discord support community included",
+      checkoutUrl: "https://PAYHIP_OR_GUMROAD_LINK_HERE"
+    },
+    {
+      id: "gaming-career-roadmap",
+      track: "Career",
+      level: "All Levels",
+      duration: "2.5 hours",
+      badge: "Gamer to Creator",
+      title: "Gaming Career Roadmap: Gamer to Creator",
+      image: "/assets/courses/gaming-career-roadmap.png",
+      outcome: "Transition from playing games for fun to building a sustainable creator career.",
+      description: "Step-by-step roadmap to monetize your gaming passion and build a long-term brand.",
+      originalPrice: 1999,
+      discountPrice: 999,
+      includes: [
+        "Monetization breakdown",
+        "Sponsorship outreach guide",
+        "Creator mindset & habits",
+        "Personal brand blueprint",
+      ],
+      delivery: "Instant access (Unlisted YouTube playlist) after checkout",
+      support: "Discord support community included",
+      checkoutUrl: "https://PAYHIP_OR_GUMROAD_LINK_HERE"
+    },
+    {
+      id: "post-like-a-pro",
+      track: "Productivity",
+      level: "Intermediate",
+      duration: "1.0 hour",
+      badge: "No Burnout",
+      title: "Post Like a Pro Without Burning Out",
+      image: "/assets/courses/post-like-a-pro.png",
+      outcome: "Master content batching and scheduling across all platforms.",
+      description: "Pro-posting systems and workflow habits to keep your channels active without fatigue.",
+      originalPrice: 999,
+      discountPrice: 499,
+      includes: [
+        "Batching strategy guide",
+        "Content calendar template",
+        "AI automation workflow",
+        "Burnout prevention rules",
+      ],
+      delivery: "Instant access (Unlisted YouTube playlist) after checkout",
+      support: "Discord support community included",
+      checkoutUrl: "https://PAYHIP_OR_GUMROAD_LINK_HERE"
+    },
+    {
+      id: "social-media-fame-blueprint",
+      track: "Multi-Platform",
+      level: "Advanced",
+      duration: "3.0 hours",
+      badge: "Fame Blueprint",
+      title: "Social Media Fame Blueprint (All Platforms)",
+      image: "/assets/courses/social-media-fame-blueprint.png",
+      outcome: "Omnichannel strategy to dominate YouTube, Reels, TikTok, and Facebook simultaneously.",
+      description: "The complete blueprint for cross-platform expansion and rapid audience acquisition.",
+      originalPrice: 2499,
+      discountPrice: 1249,
+      includes: [
+        "Omnichannel repurposing strategy",
+        "Viral hook formulas",
+        "Analytics & iteration system",
+        "Scale to 100k+ blueprint",
+      ],
+      delivery: "Instant access (Unlisted YouTube playlist) after checkout",
+      support: "Discord support community included",
+      checkoutUrl: "https://PAYHIP_OR_GUMROAD_LINK_HERE"
+    },
+    {
+      id: "streamlabs-essentials",
+      track: "Streaming",
+      level: "Beginner",
+      duration: "1.0 hour",
+      badge: "Go Live Stress-Free",
+      title: "Streamlabs Essentials: Go Live w/o Stress!",
+      image: "/assets/courses/streamlabs-essentials.png",
+      outcome: "Set up Streamlabs OBS, audio filters, and scene transitions hassle-free.",
+      description: "Essential guide to smooth, lag-free streaming setup for any PC specs.",
+      originalPrice: 899,
+      discountPrice: 449,
+      includes: [
+        "Streamlabs setup checklist",
+        "Audio noise suppression setup",
+        "Widget & overlay integration",
+        "Low-lag settings guide",
+      ],
+      delivery: "Instant access (Unlisted YouTube playlist) after checkout",
+      support: "Discord support community included",
+      checkoutUrl: "https://PAYHIP_OR_GUMROAD_LINK_HERE"
+    },
   ],
- 
 
   shop: {
     affiliateNote: "Affiliate shop: if you buy from these links, Detx Gaming may earn a commission (no extra cost to you).",
