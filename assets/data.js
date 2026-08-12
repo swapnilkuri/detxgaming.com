@@ -38,7 +38,7 @@ window.DETX = {
       duration: "1.5 hours",
       badge: "Best for new creators",
       title: "How to Start YouTube Journey (Gaming)",
-      image: "/assets/courses/start-your-youtube-journey.png",
+      image: "assets/courses/start-your-youtube-journey.png",
       outcome: "Upload your first 10 videos with a repeatable system.",
       description: "From channel setup to your first upload pipeline. For gaming creators who keep overthinking.",
       originalPrice: 999,
