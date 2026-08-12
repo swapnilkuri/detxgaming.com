@@ -525,6 +525,29 @@ async function loadHomepageReviews() {
     return;
   }
 
+  // Auth Routing for "My Account" Button
+window.handleAccountClick = async function() {
+  const sb = safeGetSupabase();
+  if (!sb) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const { data: { session } } = await sb.auth.getSession();
+  
+  if (session) {
+    // If logged in as admin, go to admin panel, otherwise go to student account
+    if (session.user.email === 'swapnil7kuri@gmail.com') {
+      window.location.href = "admin/index.html";
+    } else {
+      window.location.href = "account.html";
+    }
+  } else {
+    // Not logged in
+    window.location.href = "login.html";
+  }
+};
+
   container.innerHTML = reviews.map(r => `
     <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-xl">
       <div class="flex justify-between items-center mb-2">
