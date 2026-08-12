@@ -506,6 +506,25 @@ async function loadPublicCourses() {
   `).join('');
 }
 
+async function checkAuthNavState() {
+  const sb = safeGetSupabase();
+  if (!sb) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+  
+  // Find the header buttons container (where Login / Sign Up usually live)
+  const authButtonsContainer = document.querySelector('header .flex.items-center.gap-2') || document.querySelector('header nav + div') || document.querySelector('header .flex.items-center');
+  
+  if (session && authButtonsContainer) {
+    // Replace login/signup with My Account button
+    authButtonsContainer.innerHTML = `
+      <a href="account.html" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+        👤 My Account
+      </a>
+    `;
+  }
+}
+
 async function loadHomepageReviews() {
   const container = document.getElementById("homepage-reviews-grid");
   if (!container) return;
@@ -583,6 +602,7 @@ function boot() {
   loadPublicCourses();
   loadHomepageReviews();
   updateCartUI();
+  checkAuthNavState(); // <-- Add this here
 }
 
 document.addEventListener("DOMContentLoaded", boot);
