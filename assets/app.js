@@ -85,7 +85,12 @@ function getCourseById(id) {
 
 function encodeImagePath(path) {
   if (!path) return "";
-  return encodeURI(path).replace(/\+/g, "%2B");
+  // Ensure path starts with a single leading slash if not an absolute URL
+  let cleanPath = path.trim();
+  if (!cleanPath.startsWith("http") && !cleanPath.startsWith("/")) {
+    cleanPath = "/" + cleanPath;
+  }
+  return encodeURI(cleanPath).replace(/\+/g, "%2B");
 }
 
 function courseCard(c) {
