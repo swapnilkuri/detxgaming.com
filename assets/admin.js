@@ -1,9 +1,8 @@
-// assets/admin.js - Complete Dark & Gold Castle Admin Controller
+// assets/admin.js - Dark & Gold Castle Admin Controller
 
 const ADMIN_EMAIL = 'swapnil7kuri@gmail.com';
 let currentTab = "dashboard";
 
-// Safe helper to obtain Supabase client instance
 function safeGetSupabase() {
   if (typeof getSupabase === "function") {
     try {
@@ -15,10 +14,9 @@ function safeGetSupabase() {
   return null;
 }
 
-// Security Guard: Restrict dashboard access exclusively to ADMIN_EMAIL
 async function guardAdminAccess() {
   const sb = safeGetSupabase();
-  if (!sb) return true; // Keep UI responsive if Supabase isn't initialized
+  if (!sb) return true;
 
   try {
     const { data, error } = await sb.auth.getSession();
@@ -34,13 +32,10 @@ async function guardAdminAccess() {
   return true;
 }
 
-// Global Actions
 window.handleAdminLogout = async function() {
   const sb = safeGetSupabase();
   if (sb) {
-    try {
-      await sb.auth.signOut();
-    } catch (e) {}
+    try { await sb.auth.signOut(); } catch (e) {}
   }
   window.location.href = '../login.html';
 };
@@ -50,27 +45,19 @@ window.toggleCourseForm = function() {
   if (form) form.classList.toggle('hidden');
 };
 
-// Global Tab Switcher
 window.switchTab = function(tabName) {
   currentTab = tabName;
   
-  // Hide all tab content sections
   document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
-  
-  // Reset all sidebar button styles
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.remove("text-yellow-400", "bg-zinc-900", "border-l-2", "border-yellow-400", "font-semibold");
     btn.classList.add("text-gray-400");
   });
 
-  // Activate selected tab content and sidebar button
   const activeTab = document.getElementById(`tab-${tabName}`);
   const activeBtn = document.getElementById(`btn-${tabName}`);
 
-  if (activeTab) {
-    activeTab.classList.remove("hidden");
-  }
-
+  if (activeTab) activeTab.classList.remove("hidden");
   if (activeBtn) {
     activeBtn.classList.add("text-yellow-400", "bg-zinc-900", "border-l-2", "border-yellow-400", "font-semibold");
     activeBtn.classList.remove("text-gray-400");
@@ -79,7 +66,42 @@ window.switchTab = function(tabName) {
   loadTabData(tabName);
 };
 
-// Data Router
+// 1-Click Sync Local Courses from assets/data.js into Supabase
+window.syncLocalCoursesToDatabase = async function() {
+  const sb = safeGetSupabase();
+  if (!sb) {
+    alert("Supabase client is not connected.");
+    return;
+  }
+
+  if (!window.DETX?.courses) {
+    alert("No local courses found in assets/data.js");
+    return;
+  }
+
+  const coursePayloads = window.DETX.courses.map(c => ({
+    title: c.title,
+    slug: c.id,
+    price: c.discountPrice || c.originalPrice,
+    original_price: c.originalPrice,
+    thumbnail_url: c.image,
+    description: c.description,
+    level: c.level || "Beginner",
+    duration: c.duration || "1 Hour",
+    is_published: true,
+    is_featured: true
+  }));
+
+  const { error } = await sb.from("courses").upsert(coursePayloads, { onConflict: "slug" });
+
+  if (error) {
+    alert("Failed to sync courses: " + error.message);
+  } else {
+    alert("✅ Successfully synced 12 local courses to Supabase Database!");
+    loadTabData(currentTab);
+  }
+};
+
 async function loadTabData(tab) {
   const sb = safeGetSupabase();
   if (!sb) return;
@@ -104,6 +126,9 @@ async function loadTabData(tab) {
         break;
       case "courses":
         loadCoursesAdmin(sb);
+        break;
+      case "categories":
+        loadCategoriesList(sb);
         break;
       case "messages":
         loadMessages(sb);
@@ -135,7 +160,7 @@ async function loadDashboardMetrics(sb) {
   }
 }
 
-// 2. Enrollments / Orders Queue
+// 2. Orders & Enrollments Queue
 async function loadEnrollments(sb) {
   const container = document.getElementById('enrollments-list');
   if (!container) return;
@@ -230,6 +255,28 @@ window.toggleCouponStatus = async function(id, newStatus) {
   loadCouponsList(sb);
 };
 
+document.getElementById("coupon-form")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const sb = safeGetSupabase();
+  if (!sb) return;
+
+  const code = document.getElementById("coupon-code").value.trim().toUpperCase();
+  const discount_type = document.getElementById("coupon-type").value;
+  const discount_value = parseFloat(document.getElementById("coupon-value").value);
+  const min_spend = parseFloat(document.getElementById("coupon-min").value) || 0;
+
+  const { error } = await sb.from("coupons").insert([{ code, discount_type, discount_value, min_spend, is_active: true }]);
+
+  if (error) {
+    alert("Error creating coupon: " + error.message);
+  } else {
+    alert("Coupon created!");
+    document.getElementById("coupon-form").reset();
+    document.getElementById("coupon-form").classList.add("hidden");
+    loadCouponsList(sb);
+  }
+});
+
 // 5. Customer Reviews Moderation
 async function loadReviewsManager(sb) {
   const list = document.getElementById("reviews-list");
@@ -270,7 +317,49 @@ window.approveReview = async function(id, status) {
   loadReviewsManager(sb);
 };
 
-// 6. Manage Courses
+// 6. Categories Manager
+async function loadCategoriesList(sb) {
+  const container = document.getElementById("categories-list");
+  if (!container) return;
+
+  const { data: categories } = await sb.from("categories").select("*");
+
+  if (!categories || !categories.length) {
+    container.innerHTML = `<p class="text-gray-500 col-span-3">No categories created yet.</p>`;
+    return;
+  }
+
+  container.innerHTML = categories.map(cat => `
+    <div class="bg-black/50 border border-zinc-800 p-4 rounded-xl flex justify-between items-center">
+      <div>
+        <h4 class="font-bold text-white">${cat.name}</h4>
+        <p class="text-xs text-yellow-500 font-mono">slug: ${cat.slug}</p>
+      </div>
+    </div>
+  `).join("");
+}
+
+document.getElementById("category-form")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const sb = safeGetSupabase();
+  if (!sb) return;
+
+  const name = document.getElementById("category-name").value.trim();
+  const slug = document.getElementById("category-slug").value.trim();
+
+  const { error } = await sb.from("categories").insert([{ name, slug }]);
+
+  if (error) {
+    alert("Error adding category: " + error.message);
+  } else {
+    alert("Category added!");
+    document.getElementById("category-form").reset();
+    document.getElementById("category-form").classList.add("hidden");
+    loadCategoriesList(sb);
+  }
+});
+
+// 7. Manage Courses
 async function loadCoursesAdmin(sb) {
   const container = document.getElementById('courses-list');
   if (!container) return;
@@ -278,7 +367,7 @@ async function loadCoursesAdmin(sb) {
   const { data, error } = await sb.from('courses').select('*').order('created_at', { ascending: false });
 
   if (error || !data || !data.length) {
-    container.innerHTML = `<p class="text-gray-500 col-span-2">No courses created yet.</p>`;
+    container.innerHTML = `<p class="text-gray-500 col-span-2">No courses found in database. Click "Import Local Courses" above.</p>`;
     return;
   }
 
@@ -305,7 +394,7 @@ window.deleteCourse = async function(id) {
   }
 };
 
-// 7. Contact Messages
+// 8. Contact Messages
 async function loadMessages(sb) {
   const container = document.getElementById('messages-list');
   if (!container) return;
@@ -326,32 +415,6 @@ async function loadMessages(sb) {
     </tr>
   `).join('');
 }
-
-// Event Listener for Adding New Course
-document.getElementById('course-form')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const sb = safeGetSupabase();
-  if (!sb) return;
-
-  const title = document.getElementById('course-title').value;
-  const slug = document.getElementById('course-slug').value;
-  const price = parseFloat(document.getElementById('course-price').value);
-  const thumbnail_url = document.getElementById('course-thumb').value;
-  const description = document.getElementById('course-desc').value;
-
-  const { error } = await sb.from('courses').insert([
-    { title, slug, price, thumbnail_url, description, is_published: true }
-  ]);
-
-  if (error) {
-    alert('Error saving course: ' + error.message);
-  } else {
-    alert('Course added successfully!');
-    document.getElementById('course-form').reset();
-    toggleCourseForm();
-    loadCoursesAdmin(sb);
-  }
-});
 
 // Main Dashboard Initialization
 document.addEventListener('DOMContentLoaded', async () => {
