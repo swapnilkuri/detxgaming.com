@@ -3,7 +3,12 @@
 const ADMIN_EMAIL = 'swapnil7kuri@gmail.com';
 let currentTab = "dashboard";
 
-// Safe helper to obtain Supabase client instance
+function escapeHTML(str) {
+  return String(str || '').replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[m]));
+}
+
 function safeGetSupabase() {
   if (typeof getSupabase === "function") {
     try {
@@ -15,28 +20,40 @@ function safeGetSupabase() {
   return null;
 }
 
-// Security Guard: Restrict dashboard access exclusively to ADMIN_EMAIL
 async function guardAdminAccess() {
   const sb = safeGetSupabase();
-  if (!sb) return false;
+  if (!sb) {
+    window.location.href = '../login.html';
+    return false;
+  }
 
-  const { data, error } = await sb.auth.getSession();
-  const session = data?.session;
+  try {
+    const { data, error } = await sb.auth.getSession();
+    const session = data?.session;
 
-  if (error || !session || session.user.email !== ADMIN_EMAIL) {
+    if (error || !session || session.user.email !== ADMIN_EMAIL) {
+      window.location.href = '../login.html';
+      return false;
+    }
+  } catch (err) {
+    console.warn("Auth check warning:", err);
     window.location.href = '../login.html';
     return false;
   }
   return true;
 }
 
-// Tab Switching & UI Navigation
-function switchTab(tabName) {
+window.handleAdminLogout = async function() {
+  const sb = safeGetSupabase();
+  if (sb) await sb.auth.signOut();
+  window.location.href = '../login.html';
+};
+
+window.switchTab = function(tabName) {
   currentTab = tabName;
-  
   document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
   document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.classList.remove("text-yellow-400", "border-b-2", "border-yellow-400");
+    btn.classList.remove("text-yellow-400", "bg-zinc-900", "border-l-2", "border-yellow-400", "font-semibold");
     btn.classList.add("text-gray-400");
   });
 
@@ -45,56 +62,60 @@ function switchTab(tabName) {
 
   if (activeTab) activeTab.classList.remove("hidden");
   if (activeBtn) {
-    activeBtn.classList.add("text-yellow-400", "border-b-2", "border-yellow-400");
+    activeBtn.classList.add("text-yellow-400", "bg-zinc-900", "border-l-2", "border-yellow-400", "font-semibold");
     activeBtn.classList.remove("text-gray-400");
   }
 
   loadTabData(tabName);
-}
+};
 
-// Router to load tab-specific data dynamically
 async function loadTabData(tab) {
   const sb = safeGetSupabase();
   if (!sb) return;
 
-  switch (tab) {
-    case "dashboard":
-      loadDashboardMetrics(sb);
-      break;
-    case "enrollments":
-    case "orders":
-      loadEnrollments(sb);
-      break;
-    case "customers":
-      loadCustomerDirectory(sb);
-      break;
-    case "coupons":
-      loadCouponsList(sb);
-      break;
-    case "reviews":
-      loadReviewsManager(sb);
-      break;
-    case "courses":
-      loadCoursesAdmin(sb);
-      break;
-    case "messages":
-      loadMessages(sb);
-      break;
+  try {
+    switch (tab) {
+      case "dashboard":
+        await loadDashboardMetrics(sb);
+        break;
+      case "enrollments":
+      case "orders":
+        await loadEnrollments(sb);
+        break;
+      case "customers":
+        await loadCustomerDirectory(sb);
+        break;
+      case "coupons":
+        await loadCouponsList(sb);
+        break;
+      case "reviews":
+        await loadReviewsManager(sb);
+        break;
+      case "courses":
+        await loadCoursesAdmin(sb);
+        break;
+      case "messages":
+        await loadMessages(sb);
+        break;
+    }
+  } catch (err) {
+    console.error(`Error loading data for tab [${tab}]:`, err);
   }
 }
 
-// 1. Dashboard Metrics
 async function loadDashboardMetrics(sb) {
-  const { data: enrollments } = await sb.from("enrollments").select("*");
-  const { data: customers } = await sb.from("profiles").select("*");
+  const { data: enrollments, error: err1 } = await sb.from("enrollments").select("*");
+  const { data: customers, error: err2 } = await sb.from("profiles").select("*");
+
+  if (err1 || err2) return;
 
   const totalRevenue = enrollments?.reduce((acc, o) => {
-    const val = Number(o.price_discount || o.price_original || 0);
-    return acc + (o.status === "completed" || o.status === "approved" || o.status === "paid" ? val : 0);
+    const val = Number(o.price_discount ?? o.price_original ?? 0);
+    return acc + (["completed", "approved", "paid"].includes(o.status) ? val : 0);
   }, 0) || 0;
 
   if (document.getElementById("metric-revenue")) {
-    document.getElementById("metric-revenue").textContent = "BDT " + totalRevenue.toLocaleString();
+    document.getElementById("metric-revenue").textContent = "৳ " + totalRevenue.toLocaleString();
   }
   if (document.getElementById("metric-orders")) {
     document.getElementById("metric-orders").textContent = enrollments?.length || 0;
@@ -104,7 +125,6 @@ async function loadDashboardMetrics(sb) {
   }
 }
 
-// 2. Enrollments / Orders Queue
 async function loadEnrollments(sb) {
   const container = document.getElementById('enrollments-list');
   if (!container) return;
@@ -118,16 +138,15 @@ async function loadEnrollments(sb) {
 
   container.innerHTML = data.map(item => `
     <tr class="border-b border-zinc-800 hover:bg-zinc-800/50">
-      <td class="p-3 font-semibold text-white">${item.full_name || 'N/A'}</td>
-      <td class="p-3">${item.email || 'N/A'}</td>
-      <td class="p-3">${item.phone || 'N/A'}</td>
-      <td class="p-3 text-yellow-400">${item.course_title || item.course_id}</td>
-      <td class="p-3">${item.payment_method || 'N/A'} (${item.transaction_id || 'No TxID'})</td>
+      <td class="p-3 font-semibold text-white">${escapeHTML(item.full_name || 'N/A')}</td>
+      <td class="p-3">${escapeHTML(item.email || 'N/A')}</td>
+      <td class="p-3">${escapeHTML(item.phone || 'N/A')}</td>
+      <td class="p-3 text-yellow-400">${escapeHTML(item.course_title || item.course_id)}</td>
+      <td class="p-3">${escapeHTML(item.payment_method || 'N/A')} (${escapeHTML(item.transaction_id || 'No TxID')})</td>
     </tr>
   `).join('');
 }
 
-// 3. Customer Directory & Direct Message / WhatsApp Action
 async function loadCustomerDirectory(sb) {
   const list = document.getElementById("customers-list");
   if (!list) return;
@@ -142,16 +161,16 @@ async function loadCustomerDirectory(sb) {
   list.innerHTML = customers.map(c => `
     <tr class="border-b border-zinc-800 hover:bg-zinc-800/50">
       <td class="p-3">
-        <div class="font-bold text-white">${c.full_name || "Anonymous"}</div>
-        <div class="text-xs text-gray-400">${c.email}</div>
+        <div class="font-bold text-white">${escapeHTML(c.full_name || "Anonymous")}</div>
+        <div class="text-xs text-gray-400">${escapeHTML(c.email)}</div>
       </td>
-      <td class="p-3">${c.phone || "N/A"}</td>
+      <td class="p-3">${escapeHTML(c.phone || "N/A")}</td>
       <td class="p-3">${c.orders_count || 0}</td>
       <td class="p-3 text-yellow-400 font-semibold">৳${(c.total_spent || 0).toLocaleString()}</td>
-      <td class="p-3">${c.city || "N/A"}</td>
+      <td class="p-3">${escapeHTML(c.city || "N/A")}</td>
       <td class="p-3">
         ${c.phone ? `
-          <a href="https://wa.me/${c.phone.replace(/[^0-9]/g, '')}" target="_blank" class="bg-green-600 hover:bg-green-500 text-white text-xs px-2.5 py-1 rounded inline-block">
+          <a href="https://wa.me/${escapeHTML(c.phone.replace(/[^0-9]/g, ''))}" target="_blank" class="bg-green-600 hover:bg-green-500 text-white text-xs px-2.5 py-1 rounded inline-block">
             WhatsApp / SMS
           </a>
         ` : `<span class="text-xs text-gray-500">No Phone</span>`}
@@ -160,7 +179,6 @@ async function loadCustomerDirectory(sb) {
   `).join("");
 }
 
-// 4. Coupons Controller
 async function loadCouponsList(sb) {
   const list = document.getElementById("coupons-list");
   if (!list) return;
@@ -176,7 +194,7 @@ async function loadCouponsList(sb) {
     <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex justify-between items-center mb-3">
       <div>
         <div class="flex items-center gap-2">
-          <span class="font-bold text-yellow-400 text-lg">${cp.code}</span>
+          <span class="font-bold text-yellow-400 text-lg">${escapeHTML(cp.code)}</span>
           <span class="text-xs px-2 py-0.5 rounded ${cp.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
             ${cp.is_active ? 'ACTIVE' : 'INACTIVE'}
           </span>
@@ -185,21 +203,20 @@ async function loadCouponsList(sb) {
           ${cp.discount_type === 'Percent' ? cp.discount_value + '%' : '৳' + cp.discount_value} OFF • Min Spend: ৳${cp.min_spend}
         </p>
       </div>
-      <button onclick="toggleCouponStatus('${cp.id}', ${!cp.is_active})" class="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded">
+      <button onclick="toggleCouponStatus('${escapeHTML(cp.id)}', ${!cp.is_active})" class="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded">
         ${cp.is_active ? 'Deactivate' : 'Activate'}
       </button>
     </div>
   `).join("");
 }
 
-async function toggleCouponStatus(id, newStatus) {
+window.toggleCouponStatus = async function(id, newStatus) {
   const sb = safeGetSupabase();
   if (!sb) return;
   await sb.from("coupons").update({ is_active: newStatus }).eq("id", id);
   loadCouponsList(sb);
-}
+};
 
-// 5. Customer Reviews Moderation
 async function loadReviewsManager(sb) {
   const list = document.getElementById("reviews-list");
   if (!list) return;
@@ -215,16 +232,16 @@ async function loadReviewsManager(sb) {
     <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-xl mb-4">
       <div class="flex justify-between items-start mb-2">
         <div>
-          <h4 class="font-bold text-white">${r.user_name} <span class="text-xs text-yellow-500 font-normal">on ${r.course_title || "Course"}</span></h4>
+          <h4 class="font-bold text-white">${escapeHTML(r.user_name)} <span class="text-xs text-yellow-500 font-normal">on ${escapeHTML(r.course_title || "Course")}</span></h4>
           <div class="text-yellow-400 text-xs mt-0.5">${"★".repeat(r.rating || 5)}</div>
         </div>
         <span class="text-xs px-2 py-1 rounded ${r.is_approved ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'}">
           ${r.is_approved ? 'APPROVED' : 'PENDING'}
         </span>
       </div>
-      <p class="text-sm text-gray-300 mb-3">"${r.comment}"</p>
+      <p class="text-sm text-gray-300 mb-3">"${escapeHTML(r.comment)}"</p>
       <div class="flex gap-2 items-center pt-2 border-t border-zinc-800">
-        <button onclick="approveReview('${r.id}', ${!r.is_approved})" class="bg-yellow-500 text-black text-xs font-bold px-3 py-1.5 rounded">
+        <button onclick="approveReview('${escapeHTML(r.id)}', ${!r.is_approved})" class="bg-yellow-500 text-black text-xs font-bold px-3 py-1.5 rounded">
           ${r.is_approved ? 'Unapprove' : 'Approve Review'}
         </button>
       </div>
@@ -232,18 +249,17 @@ async function loadReviewsManager(sb) {
   `).join("");
 }
 
-async function approveReview(id, status) {
+window.approveReview = async function(id, status) {
   const sb = safeGetSupabase();
   if (!sb) return;
   await sb.from("reviews").update({ is_approved: status }).eq("id", id);
   loadReviewsManager(sb);
-}
+};
 
-// 6. Manage Courses
-function toggleCourseForm() {
+window.toggleCourseForm = function() {
   const form = document.getElementById('course-form');
   if (form) form.classList.toggle('hidden');
-}
+};
 
 async function loadCoursesAdmin(sb) {
   const container = document.getElementById('courses-list');
@@ -259,17 +275,17 @@ async function loadCoursesAdmin(sb) {
   container.innerHTML = data.map(course => `
     <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex justify-between items-center">
       <div>
-        <h3 class="font-bold text-white">${course.title}</h3>
-        <p class="text-xs text-yellow-400 font-mono">৳${course.price} | Slug: ${course.slug}</p>
+        <h3 class="font-bold text-white">${escapeHTML(course.title)}</h3>
+        <p class="text-xs text-yellow-400 font-mono">৳${course.price} | Slug: ${escapeHTML(course.slug)}</p>
       </div>
-      <button onclick="deleteCourse('${course.id}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white text-xs px-3 py-1.5 rounded transition">
+      <button onclick="deleteCourse('${escapeHTML(course.id)}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white text-xs px-3 py-1.5 rounded transition">
         Delete
       </button>
     </div>
   `).join('');
 }
 
-async function deleteCourse(id) {
+window.deleteCourse = async function(id) {
   const sb = safeGetSupabase();
   if (!sb) return;
 
@@ -277,9 +293,8 @@ async function deleteCourse(id) {
     const { error } = await sb.from('courses').delete().eq('id', id);
     if (!error) loadCoursesAdmin(sb);
   }
-}
+};
 
-// 7. Contact Messages
 async function loadMessages(sb) {
   const container = document.getElementById('messages-list');
   if (!container) return;
@@ -293,44 +308,45 @@ async function loadMessages(sb) {
 
   container.innerHTML = data.map(item => `
     <tr class="border-b border-zinc-800 hover:bg-zinc-800/50">
-      <td class="p-3 font-semibold text-white">${item.full_name || 'N/A'}</td>
-      <td class="p-3">${item.email || 'N/A'}</td>
-      <td class="p-3 text-yellow-400">${item.subject || 'N/A'}</td>
-      <td class="p-3">${item.message || 'N/A'}</td>
+      <td class="p-3 font-semibold text-white">${escapeHTML(item.full_name || 'N/A')}</td>
+      <td class="p-3">${escapeHTML(item.email || 'N/A')}</td>
+      <td class="p-3 text-yellow-400">${escapeHTML(item.subject || 'N/A')}</td>
+      <td class="p-3">${escapeHTML(item.message || 'N/A')}</td>
     </tr>
   `).join('');
 }
 
-// Event Listeners
-document.getElementById('course-form')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const sb = safeGetSupabase();
-  if (!sb) return;
-
-  const title = document.getElementById('course-title').value;
-  const slug = document.getElementById('course-slug').value;
-  const price = parseFloat(document.getElementById('course-price').value);
-  const thumbnail_url = document.getElementById('course-thumb').value;
-  const description = document.getElementById('course-desc').value;
-
-  const { error } = await sb.from('courses').insert([
-    { title, slug, price, thumbnail_url, description, is_published: true }
-  ]);
-
-  if (error) {
-    alert('Error saving course: ' + error.message);
-  } else {
-    alert('Course added successfully!');
-    document.getElementById('course-form').reset();
-    toggleCourseForm();
-    loadCoursesAdmin(sb);
-  }
-});
-
-// Main Dashboard Initialization
 document.addEventListener('DOMContentLoaded', async () => {
-  const allowed = await guardAdminAccess();
-  if (!allowed) return;
+  const courseForm = document.getElementById('course-form');
+  if (courseForm) {
+    courseForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const sb = safeGetSupabase();
+      if (!sb) return;
 
-  switchTab("dashboard");
+      const title = document.getElementById('course-title')?.value || '';
+      const slug = document.getElementById('course-slug')?.value || '';
+      const price = parseFloat(document.getElementById('course-price')?.value || 0);
+      const thumbnail_url = document.getElementById('course-thumb')?.value || '';
+      const description = document.getElementById('course-desc')?.value || '';
+
+      const { error } = await sb.from('courses').insert([
+        { title, slug, price, thumbnail_url, description, is_published: true }
+      ]);
+
+      if (error) {
+        alert('Error saving course: ' + error.message);
+      } else {
+        alert('Course added successfully!');
+        courseForm.reset();
+        window.toggleCourseForm();
+        loadCoursesAdmin(sb);
+      }
+    });
+  }
+
+  const allowed = await guardAdminAccess();
+  if (allowed) {
+    window.switchTab("dashboard");
+  }
 });
