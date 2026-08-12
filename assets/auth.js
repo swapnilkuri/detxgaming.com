@@ -1,4 +1,4 @@
-// assets/auth.js[cite: 4]
+// assets/auth.js
 let isSignUp = new URLSearchParams(window.location.search).get('mode') === 'signup';
 const ADMIN_EMAIL = 'swapnil7kuri@gmail.com';
 
@@ -19,12 +19,12 @@ function toggleAuthMode() {
 // Reflect ?mode=signup on initial load
 applyAuthMode();
 
-// Google Provider Sign-In (Redirects to account.html)
+// Google Provider Sign-In (Redirects to profile completion step)
 async function loginWithGoogle() {
   const sb = getSupabase();
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin + '/account.html' }
+    options: { redirectTo: window.location.origin + '/complete-profile.html' }
   });
   if (error) alert(error.message);
 }
