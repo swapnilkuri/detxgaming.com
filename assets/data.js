@@ -7,8 +7,6 @@ window.DETX = {
 
   // Global discount campaign (urgency timer)
   campaign: {
-    // Set your real end date/time (BD time works fine)
-    // Example: "2026-03-01T23:59:59+06:00"
     endsAt: "2026-03-01T23:59:59+06:00",
     label: "🔥 50% OFF Creator Sale",
     note: "Sale ends soon. Price goes back up after timer ends.",
@@ -35,8 +33,6 @@ window.DETX = {
     livePlaylistId: "PL2gip3RqVaHfKpGTDwUsNpjsT5wRRcf_6",
   },
 
-
-  // Many small cheap courses
   courses: [
     {
       id: "yt-journey-starter",
@@ -45,7 +41,7 @@ window.DETX = {
       duration: "1.5 hours",
       badge: "Best for new creators",
       title: "How to Start YouTube Journey (Gaming)",
-      image: "assets/courses/How to Start YouTube Journey.png",
+      image: "assets/courses/start-your-youtube-journey.png",
       outcome: "Upload your first 10 videos with a repeatable system.",
       description:
         "From channel setup to your first upload pipeline. For gaming creators who keep overthinking.",
@@ -59,7 +55,6 @@ window.DETX = {
       ],
       delivery: "Instant access (Unlisted YouTube playlist) after checkout",
       support: "Discord support community included",
-      // ✅ Put your Payhip/Gumroad checkout link here to make access automatic
       checkoutUrl: "https://PAYHIP_OR_GUMROAD_LINK_HERE"
     },
 
@@ -70,7 +65,7 @@ window.DETX = {
       duration: "2 hours",
       badge: "Most useful",
       title: "YouTube SEO for Gaming (ChatGPT + VidIQ style)",
-      image: "assets/courses/YouTube SEO for Gaming (ChatGPT + VidIQ style).png",
+      image: "assets/courses/youtube-seo-mastery.png",
       outcome: "Get searchable titles, tags, descriptions that pull views.",
       description:
         "Practical SEO: keywords, packaging, retention basics, and the AI workflow you’ll use daily.",
@@ -94,7 +89,7 @@ window.DETX = {
       duration: "1.2 hours",
       badge: "Reels focused",
       title: "Learn Instagram Algorithm (Gaming Reels)",
-      image: "assets/courses/Learn Instagram Algorithm (Gaming Reels).png",
+      image: "assets/courses/instagram-algorithm-playbook.png",
       outcome: "Make reels that get pushed instead of dying at 200 views.",
       description:
         "Hooks, pacing, overlays, posting rhythm, and growth mechanics for gaming clips.",
@@ -118,7 +113,7 @@ window.DETX = {
       duration: "1.5 hours",
       badge: "Live setup",
       title: "How to Start Professional Live Stream (Streamlabs)",
-      image: "assets/courses/How to Start Professional Live Stream (Streamlabs).png",
+      image: "assets/courses/pro-live-streaming-setup.png",
       outcome: "Go live with clean overlays, alerts, audio, and stability.",
       description:
         "Setup that looks pro without expensive gear: scenes, alerts, mic filters, bitrate rules.",
@@ -142,7 +137,7 @@ window.DETX = {
       duration: "1.3 hours",
       badge: "Fast edits",
       title: "CapCut Editing for Gaming (Shorts/Reels)",
-      image: "assets/courses/CapCut Editing for Gaming (ShortsReels).png",
+      image: "assets/courses/capcut-editing.png",
       outcome: "Edit clips fast with a consistent style.",
       description:
         "Cuts, captions, zooms, sound design basics — gaming optimized.",
@@ -166,7 +161,7 @@ window.DETX = {
       duration: "45 mins",
       badge: "Quick win",
       title: "Generate Thumbnail in 1 Minute (Fast Method)",
-      image: "assets/courses/Generate Thumbnail in 1 Minute (Fast Method).png",
+      image: "assets/courses/1-minute-thumbnail-method.png",
       outcome: "Make thumbnails fast without getting stuck.",
       description:
         "Simple layout rules + template approach so you can upload daily.",
@@ -190,7 +185,7 @@ window.DETX = {
       duration: "1.1 hours",
       badge: "Pro look",
       title: "Professional Thumbnail using Canva + AI (Gemini style)",
-      image: "assets/courses/Professional Thumbnail using Canva + AI (Gemini style).png",
+      image: "assets/courses/pro-thumbnail-canva-ai.png",
       outcome: "High CTR thumbnails that look like real gaming creators.",
       description:
         "Design rules + AI workflow to speed up idea + execution.",
