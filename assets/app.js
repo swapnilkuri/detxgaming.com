@@ -4,7 +4,7 @@ function qs(sel, root = document) { return root.querySelector(sel); }
 function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
 
 function money(n) {
-  return "₹" + Number(n).toLocaleString("en-US");
+  return "₹" + Number(n || 0).toLocaleString("en-US");
 }
 
 function setYear() {
@@ -12,9 +12,20 @@ function setYear() {
   if (y) y.textContent = new Date().getFullYear();
 }
 
+function safeGetSupabase() {
+  if (typeof getSupabase === "function") {
+    try {
+      return getSupabase();
+    } catch (e) {
+      console.warn("Supabase client not ready:", e);
+    }
+  }
+  return null;
+}
+
 function renderSocials() {
   const wrap = qs("[data-socials]");
-  if (!wrap) return;
+  if (!wrap || !window.DETX?.socials) return;
   wrap.innerHTML = DETX.socials
     .map(s => `<a class="chip" href="${s.href}" target="_blank" rel="noopener">${s.label}</a>`)
     .join("");
@@ -28,6 +39,7 @@ function navActive() {
 }
 
 function campaignRemaining() {
+  if (!window.DETX?.campaign?.endsAt) return { diff: 0, d: 0, h: 0, m: 0, s: 0 };
   const ends = new Date(DETX.campaign.endsAt).getTime();
   const now = Date.now();
   const diff = Math.max(0, ends - now);
@@ -42,7 +54,7 @@ function campaignRemaining() {
 
 function renderUrgency() {
   const host = qs("[data-urgency]");
-  if (!host) return;
+  if (!host || !window.DETX?.campaign) return;
 
   host.innerHTML = `
     <div class="urgencyBar">
@@ -62,39 +74,38 @@ function renderUrgency() {
       return;
     }
     el.textContent = `${String(r.d).padStart(2,"0")}d : ${String(r.h).padStart(2,"0")}h : ${String(r.m).padStart(2,"0")}m : ${String(r.s).padStart(2,"0")}s`;
-    requestAnimationFrame(() => {});
   };
   setInterval(tick, 1000);
   tick();
 }
 
 function getCourseById(id) {
-  return DETX.courses.find(c => c.id === id);
+  return window.DETX?.courses?.find(c => c.id === id);
 }
 
-// encodeURI leaves "+" untouched, but some static hosts treat a literal "+"
-// in a path as an encoded space. Explicitly encode it as %2B to be safe.
 function encodeImagePath(path) {
+  if (!path) return "";
   return encodeURI(path).replace(/\+/g, "%2B");
 }
 
 function courseCard(c) {
+  const badgeText = c.badge || "50% OFF";
   return `
   <article class="card courseCard">
     <div>
       <div class="courseThumb">
-        ${c.image ? `<img src="${encodeImagePath(c.image)}" alt="${c.title}" loading="lazy" onerror="this.closest('.courseThumb').classList.add('noImg'); this.remove();"/>` : ""}
+        ${c.image ? `<img src="${encodeImagePath(c.image)}" alt="${c.title}" loading="lazy" onerror="this.closest('.courseThumb').classList.add('noImg'); this.style.display='none';"/>` : ""}
       </div>
 
       <div class="badgeRow">
-        <span class="badge">${c.track}</span>
-        <span class="muted" style="font-size:12px;">${c.level} • ${c.duration}</span>
+        <span class="badge">${c.track || "Course"}</span>
+        <span class="muted" style="font-size:12px;">${c.level || "Beginner"} • ${c.duration || ""}</span>
       </div>
 
-      ${c.badge ? `<div class="tag">50% OFF</div>` : `<div class="tag">50% OFF</div>`}
+      <div class="tag">${badgeText}</div>
 
       <h3 class="cardTitle">${c.title}</h3>
-      <p class="muted" style="margin:0;">${c.outcome}</p>
+      <p class="muted" style="margin:0;">${c.outcome || ""}</p>
     </div>
 
     <div class="priceRow">
@@ -109,13 +120,13 @@ function courseCard(c) {
 
 function renderFeaturedCourses() {
   const wrap = qs("[data-featured-courses]");
-  if (!wrap) return;
+  if (!wrap || !window.DETX?.courses) return;
   wrap.innerHTML = DETX.courses.slice(0, 6).map(courseCard).join("");
 }
 
 function renderCoursesPage() {
   const wrap = qs("[data-courses]");
-  if (!wrap) return;
+  if (!wrap || !window.DETX?.courses) return;
   wrap.innerHTML = `<div class="grid">${DETX.courses.map(courseCard).join("")}</div>`;
 }
 
@@ -132,32 +143,32 @@ function renderCourseDetails() {
     return;
   }
 
-  qs("[data-course-title]").textContent = c.title;
-  qs("[data-course-track]").textContent = c.track;
-  qs("[data-course-level]").textContent = c.level;
-  qs("[data-course-duration]").textContent = c.duration;
-  qs("[data-course-desc]").textContent = c.description;
-  qs("[data-course-outcome]").textContent = c.outcome;
-  qs("[data-course-old]").textContent = money(c.originalPrice);
-  qs("[data-course-new]").textContent = money(c.discountPrice);
+  if (qs("[data-course-title]")) qs("[data-course-title]").textContent = c.title;
+  if (qs("[data-course-track]")) qs("[data-course-track]").textContent = c.track;
+  if (qs("[data-course-level]")) qs("[data-course-level]").textContent = c.level;
+  if (qs("[data-course-duration]")) qs("[data-course-duration]").textContent = c.duration;
+  if (qs("[data-course-desc]")) qs("[data-course-desc]").textContent = c.description;
+  if (qs("[data-course-outcome]")) qs("[data-course-outcome]").textContent = c.outcome;
+  if (qs("[data-course-old]")) qs("[data-course-old]").textContent = money(c.originalPrice);
+  if (qs("[data-course-new]")) qs("[data-course-new]").textContent = money(c.discountPrice);
 
   const thumbWrap = qs("[data-course-thumb]");
   if (thumbWrap) {
     if (c.image) {
-      thumbWrap.innerHTML = `<img src="${encodeImagePath(c.image)}" alt="${c.title}" onerror="this.closest('.courseThumb').classList.add('noImg'); this.remove();"/>`;
+      thumbWrap.innerHTML = `<img src="${encodeImagePath(c.image)}" alt="${c.title}" onerror="this.closest('[data-course-thumb]').classList.add('noImg'); this.style.display='none';"/>`;
     } else {
       thumbWrap.classList.add("noImg");
     }
   }
 
   const inc = qs("[data-course-includes]");
-  inc.innerHTML = c.includes.map(x => `<li>${x}</li>`).join("");
+  if (inc && c.includes) inc.innerHTML = c.includes.map(x => `<li>${x}</li>`).join("");
 
   const del = qs("[data-course-delivery]");
-  if (del) del.textContent = c.delivery;
+  if (del) del.textContent = c.delivery || "";
 
   const sup = qs("[data-course-support]");
-  if (sup) sup.textContent = c.support;
+  if (sup) sup.textContent = c.support || "";
 
   const instantBtn = qs("#instantBuyBtn");
   if (instantBtn) {
@@ -165,7 +176,6 @@ function renderCourseDetails() {
       instantBtn.href = c.checkoutUrl;
       instantBtn.style.display = "inline-flex";
     } else {
-      // still show, but user must set link
       instantBtn.href = "#";
       instantBtn.style.display = "inline-flex";
       instantBtn.textContent = "Instant Buy (Add Checkout Link)";
@@ -178,25 +188,28 @@ function renderCourseDetails() {
 
 function openEnrollModal(course) {
   const modal = qs("#enrollModal");
+  if (!modal) return;
   modal.classList.add("open");
 
-  qs("#modalCourseTitle").textContent = course.title;
-  qs("#modalPriceOld").textContent = money(course.originalPrice);
-  qs("#modalPriceNew").textContent = money(course.discountPrice);
+  if (qs("#modalCourseTitle")) qs("#modalCourseTitle").textContent = course.title;
+  if (qs("#modalPriceOld")) qs("#modalPriceOld").textContent = money(course.originalPrice);
+  if (qs("#modalPriceNew")) qs("#modalPriceNew").textContent = money(course.discountPrice);
 
   const form = qs("#enrollForm");
-  form.dataset.courseId = course.id;
-  form.dataset.courseTitle = course.title;
-  form.dataset.priceOriginal = String(course.originalPrice);
-  form.dataset.priceDiscount = String(course.discountPrice);
+  if (form) {
+    form.dataset.courseId = course.id;
+    form.dataset.courseTitle = course.title;
+    form.dataset.priceOriginal = String(course.originalPrice);
+    form.dataset.priceDiscount = String(course.discountPrice);
 
-  form.reset();
-  qs("#enrollStatus").textContent = "";
+    form.reset();
+  }
+  if (qs("#enrollStatus")) qs("#enrollStatus").textContent = "";
 }
 
 function closeEnrollModal() {
   const modal = qs("#enrollModal");
-  modal.classList.remove("open");
+  if (modal) modal.classList.remove("open");
 }
 
 function wireModal() {
@@ -217,10 +230,12 @@ async function handleEnrollSubmit() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const status = qs("#enrollStatus");
-    status.textContent = "Submitting...";
+    if (status) status.textContent = "Submitting...";
 
     try {
-      const sb = getSupabase();
+      const sb = safeGetSupabase();
+      if (!sb) throw new Error("Supabase is not initialized. Please check your config.");
+
       const payload = {
         course_id: form.dataset.courseId,
         course_title: form.dataset.courseTitle,
@@ -236,8 +251,7 @@ async function handleEnrollSubmit() {
         status: "pending"
       };
 
-      // optional upload
-      const file = qs("#paymentScreenshot").files[0];
+      const file = qs("#paymentScreenshot")?.files[0];
       if (file) {
         const ext = file.name.split(".").pop().toLowerCase();
         const safeName = `${Date.now()}_${Math.random().toString(16).slice(2)}.${ext}`;
@@ -256,17 +270,17 @@ async function handleEnrollSubmit() {
       const { error } = await sb.from("enrollments").insert(payload);
       if (error) throw error;
 
-      status.textContent = "✅ Submitted! Redirecting...";
+      if (status) status.textContent = "✅ Submitted! Redirecting...";
       setTimeout(() => { window.location.href = "success.html"; }, 500);
     } catch (err) {
       console.error(err);
-      status.textContent = "❌ Failed. Check Supabase keys/RLS or try again.";
+      if (status) status.textContent = "❌ Failed. Check Supabase keys/RLS or try again.";
     }
   });
 }
 
 function youtubeEmbed(playlistId) {
-  if (!playlistId || playlistId.includes("PASTE")) {
+  if (!playlistId || String(playlistId).includes("PASTE")) {
     return `<div class="empty">Add your playlist ID in <b>assets/data.js</b>.</div>`;
   }
   return `
@@ -332,7 +346,7 @@ function videoCardHTML({ title, videoId }) {
 
 async function renderWatchShelves() {
   const root = qs("[data-watch-shelves]");
-  if (!root) return;
+  if (!root || !window.DETX?.youtube) return;
 
   const shelves = [
     { title: "Highlights", playlistId: DETX.youtube.highlightsPlaylistId },
@@ -367,7 +381,42 @@ async function renderWatchShelves() {
 }
 
 function injectBrand() {
+  if (!window.DETX?.brand?.name) return;
   qsa("[data-brand]").forEach(el => el.textContent = DETX.brand.name);
+}
+
+async function loadPublicCourses() {
+  const container = document.getElementById('courses-grid');
+  if (!container) return;
+
+  const sb = safeGetSupabase();
+  if (!sb) return;
+
+  const { data: courses, error } = await sb
+    .from('courses')
+    .select('*')
+    .eq('is_published', true);
+
+  if (error || !courses || !courses.length) {
+    container.innerHTML = `<p class="text-gray-400">No courses available right now.</p>`;
+    return;
+  }
+
+  container.innerHTML = courses.map(course => `
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition">
+      <img src="${encodeImagePath(course.thumbnail_url)}" alt="${course.title}" class="w-full h-48 object-cover" onerror="this.style.display='none';" />
+      <div class="p-5">
+        <h3 class="text-xl font-bold text-white mb-2">${course.title}</h3>
+        <p class="text-sm text-gray-400 mb-4 line-clamp-2">${course.description}</p>
+        <div class="flex justify-between items-center">
+          <span class="text-yellow-400 font-bold text-lg">${money(course.price)}</span>
+          <a href="course.html?id=${course.slug}" class="bg-yellow-500 text-black font-semibold px-4 py-2 rounded-lg text-sm hover:bg-yellow-400 transition">
+            View Details
+          </a>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
 function boot() {
@@ -384,41 +433,7 @@ function boot() {
 
   wireModal();
   handleEnrollSubmit();
+  loadPublicCourses();
 }
 
 document.addEventListener("DOMContentLoaded", boot);
-
-// Render Live Courses on Storefront
-async function loadPublicCourses() {
-  const container = document.getElementById('courses-grid'); // Ensure your courses container has this ID in courses.html
-  if (!container) return;
-
-  const sb = getSupabase();
-  const { data: courses, error } = await sb
-    .from('courses')
-    .select('*')
-    .eq('is_published', true);
-
-  if (error || !courses.length) {
-    container.innerHTML = `<p class="text-gray-400">No courses available right now.</p>`;
-    return;
-  }
-
-  container.innerHTML = courses.map(course => `
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition">
-      <img src="${course.thumbnail_url}" alt="${course.title}" class="w-full h-48 object-cover" />
-      <div class="p-5">
-        <h3 class="text-xl font-bold text-white mb-2">${course.title}</h3>
-        <p class="text-sm text-gray-400 mb-4 line-clamp-2">${course.description}</p>
-        <div class="flex justify-between items-center">
-          <span class="text-yellow-400 font-bold text-lg">$${course.price}</span>
-          <a href="course.html?id=${course.slug}" class="bg-yellow-500 text-black font-semibold px-4 py-2 rounded-lg text-sm hover:bg-yellow-400 transition">
-            View Details
-          </a>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-document.addEventListener('DOMContentLoaded', loadPublicCourses);
