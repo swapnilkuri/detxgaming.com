@@ -1,4 +1,4 @@
-// admin/admin.js - Complete Dark & Gold Castle Admin Controller
+// assets/admin.js - Complete Dark & Gold Castle Admin Controller
 
 const ADMIN_EMAIL = 'swapnil7kuri@gmail.com';
 let currentTab = "dashboard";
@@ -18,7 +18,7 @@ function safeGetSupabase() {
 // Security Guard: Restrict dashboard access exclusively to ADMIN_EMAIL
 async function guardAdminAccess() {
   const sb = safeGetSupabase();
-  if (!sb) return true; // Allow tab navigation if Supabase is initializing
+  if (!sb) return true; // Keep UI responsive if Supabase isn't initialized
 
   try {
     const { data, error } = await sb.auth.getSession();
@@ -34,17 +34,24 @@ async function guardAdminAccess() {
   return true;
 }
 
-// Admin Logout Action
-async function handleAdminLogout() {
+// Global Actions
+window.handleAdminLogout = async function() {
   const sb = safeGetSupabase();
   if (sb) {
-    await sb.auth.signOut();
+    try {
+      await sb.auth.signOut();
+    } catch (e) {}
   }
   window.location.href = '../login.html';
-}
+};
 
-// Tab Switching & UI Navigation
-function switchTab(tabName) {
+window.toggleCourseForm = function() {
+  const form = document.getElementById('course-form');
+  if (form) form.classList.toggle('hidden');
+};
+
+// Global Tab Switcher
+window.switchTab = function(tabName) {
   currentTab = tabName;
   
   // Hide all tab content sections
@@ -70,9 +77,9 @@ function switchTab(tabName) {
   }
 
   loadTabData(tabName);
-}
+};
 
-// Router to load tab-specific data dynamically
+// Data Router
 async function loadTabData(tab) {
   const sb = safeGetSupabase();
   if (!sb) return;
@@ -103,7 +110,7 @@ async function loadTabData(tab) {
         break;
     }
   } catch (err) {
-    console.error(`Error loading data for tab [${tab}]:`, err);
+    console.error(`Error loading tab [${tab}]:`, err);
   }
 }
 
@@ -216,12 +223,12 @@ async function loadCouponsList(sb) {
   `).join("");
 }
 
-async function toggleCouponStatus(id, newStatus) {
+window.toggleCouponStatus = async function(id, newStatus) {
   const sb = safeGetSupabase();
   if (!sb) return;
   await sb.from("coupons").update({ is_active: newStatus }).eq("id", id);
   loadCouponsList(sb);
-}
+};
 
 // 5. Customer Reviews Moderation
 async function loadReviewsManager(sb) {
@@ -256,19 +263,14 @@ async function loadReviewsManager(sb) {
   `).join("");
 }
 
-async function approveReview(id, status) {
+window.approveReview = async function(id, status) {
   const sb = safeGetSupabase();
   if (!sb) return;
   await sb.from("reviews").update({ is_approved: status }).eq("id", id);
   loadReviewsManager(sb);
-}
+};
 
 // 6. Manage Courses
-function toggleCourseForm() {
-  const form = document.getElementById('course-form');
-  if (form) form.classList.toggle('hidden');
-}
-
 async function loadCoursesAdmin(sb) {
   const container = document.getElementById('courses-list');
   if (!container) return;
@@ -293,7 +295,7 @@ async function loadCoursesAdmin(sb) {
   `).join('');
 }
 
-async function deleteCourse(id) {
+window.deleteCourse = async function(id) {
   const sb = safeGetSupabase();
   if (!sb) return;
 
@@ -301,7 +303,7 @@ async function deleteCourse(id) {
     const { error } = await sb.from('courses').delete().eq('id', id);
     if (!error) loadCoursesAdmin(sb);
   }
-}
+};
 
 // 7. Contact Messages
 async function loadMessages(sb) {
