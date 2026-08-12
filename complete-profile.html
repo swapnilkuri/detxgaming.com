@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Profile - Detx Gaming</title>
+  <link rel="stylesheet" href="./assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white flex items-center justify-center min-h-screen p-4">
+
+  <div class="w-full max-w-md bg-zinc-950 border border-amber-500/20 rounded-2xl p-8 shadow-2xl">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-serif font-bold text-amber-200">Almost Done!</h1>
+      <p class="text-sm text-zinc-400 mt-1">Please provide your details to finish setting up your account</p>
+    </div>
+
+    <form id="profile-form" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-zinc-300 mb-1">Full Name</label>
+        <input type="text" id="profile-name" placeholder="Your full name" class="w-full bg-zinc-900 border border-zinc-800 focus:border-amber-500/50 p-3 rounded-xl text-sm text-white outline-none" required />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-zinc-300 mb-1">Phone Number</label>
+        <input type="tel" id="profile-phone" placeholder="017xxxxxxxx" class="w-full bg-zinc-900 border border-zinc-800 focus:border-amber-500/50 p-3 rounded-xl text-sm text-white outline-none" required />
+      </div>
+
+      <button type="submit" class="w-full bg-gradient-to-r from-amber-400 to-amber-600 hover:opacity-90 text-black font-bold py-3 rounded-full text-sm transition mt-2 shadow-lg shadow-amber-500/10 cursor-pointer">
+        Save & Continue to Store
+      </button>
+    </form>
+  </div>
+
+  <script src="./assets/supabase.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const sb = getSupabase();
+      const { data: { session } } = await sb.auth.getSession();
+      
+      if (!session) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Pre-fill name from Google account if available
+      if (session.user.user_metadata?.full_name) {
+        document.getElementById('profile-name').value = session.user.user_metadata.full_name;
+      }
+
+      document.getElementById('profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const full_name = document.getElementById('profile-name').value.trim();
+        const phone = document.getElementById('profile-phone').value.trim();
+
+        // Save profile information into Supabase profiles table
+        const { error } = await sb.from('profiles').upsert({
+          id: session.user.id,
+          email: session.user.email,
+          full_name,
+          phone
+        });
+
+        if (error) {
+          alert('Error saving profile: ' + error.message);
+        } else {
+          // Successfully saved, redirect to homepage logged in
+          window.location.href = 'index.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
