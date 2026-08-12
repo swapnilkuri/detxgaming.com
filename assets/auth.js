@@ -1,3 +1,4 @@
+// assets/auth.js[cite: 4]
 let isSignUp = new URLSearchParams(window.location.search).get('mode') === 'signup';
 const ADMIN_EMAIL = 'swapnil7kuri@gmail.com';
 
@@ -18,12 +19,12 @@ function toggleAuthMode() {
 // Reflect ?mode=signup on initial load
 applyAuthMode();
 
-// Google Provider Sign-In
+// Google Provider Sign-In (Redirects to account.html)
 async function loginWithGoogle() {
   const sb = getSupabase();
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin + '/index.html' }
+    options: { redirectTo: window.location.origin + '/account.html' }
   });
   if (error) alert(error.message);
 }
@@ -44,7 +45,7 @@ document.getElementById('auth-form').addEventListener('submit', async (e) => {
     });
     if (error) return alert(error.message);
     alert('Account created successfully!');
-    window.location.href = '/index.html';
+    window.location.href = '/account.html';
   } else {
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) return alert(error.message);
@@ -53,7 +54,7 @@ document.getElementById('auth-form').addEventListener('submit', async (e) => {
     if (data.user.email === ADMIN_EMAIL) {
       window.location.href = '/admin/index.html';
     } else {
-      window.location.href = '/index.html';
+      window.location.href = '/account.html';
     }
   }
 });
