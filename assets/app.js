@@ -85,7 +85,6 @@ function getCourseById(id) {
 
 function encodeImagePath(path) {
   if (!path) return "";
-  // Ensure path starts with a single leading slash if not an absolute URL
   let cleanPath = path.trim();
   if (!cleanPath.startsWith("http") && !cleanPath.startsWith("/")) {
     cleanPath = "/" + cleanPath;
@@ -424,6 +423,43 @@ async function loadPublicCourses() {
   `).join('');
 }
 
+async function loadHomepageReviews() {
+  const container = document.getElementById("homepage-reviews-grid");
+  if (!container) return;
+
+  const sb = safeGetSupabase();
+  if (!sb) return;
+
+  const { data: reviews, error } = await sb
+    .from("reviews")
+    .select("*")
+    .eq("is_approved", true)
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (error || !reviews || !reviews.length) {
+    container.innerHTML = `<p class="text-gray-500 col-span-3 text-center">No reviews yet.</p>`;
+    return;
+  }
+
+  container.innerHTML = reviews.map(r => `
+    <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-xl">
+      <div class="flex justify-between items-center mb-2">
+        <h4 class="font-bold text-white">${r.user_name}</h4>
+        <span class="text-yellow-400 text-sm">${"★".repeat(r.rating)}</span>
+      </div>
+      <p class="text-xs text-yellow-500 mb-2">${r.course_title || "Course Student"}</p>
+      <p class="text-sm text-gray-300 mb-3">"${r.comment}"</p>
+      ${r.reply_text ? `
+        <div class="bg-black/50 border-l-2 border-yellow-500 p-2.5 rounded text-xs text-gray-400 mt-2">
+          <span class="font-semibold text-yellow-400 block mb-1">Detx Gaming Reply:</span>
+          ${r.reply_text}
+        </div>
+      ` : ""}
+    </div>
+  `).join("");
+}
+
 function boot() {
   setYear();
   injectBrand();
@@ -439,6 +475,7 @@ function boot() {
   wireModal();
   handleEnrollSubmit();
   loadPublicCourses();
+  loadHomepageReviews();
 }
 
 document.addEventListener("DOMContentLoaded", boot);
