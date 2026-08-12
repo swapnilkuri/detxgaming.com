@@ -92,6 +92,83 @@ function encodeImagePath(path) {
   return encodeURI(cleanPath).replace(/\+/g, "%2B");
 }
 
+// Local Cart State
+let CART = JSON.parse(localStorage.getItem("DETX_CART") || "[]");
+
+function saveCart() {
+  localStorage.setItem("DETX_CART", JSON.stringify(CART));
+  updateCartUI();
+}
+
+function toggleCartDrawer() {
+  const drawer = document.getElementById("cartDrawer");
+  if (drawer) {
+    drawer.classList.toggle("hidden");
+  }
+}
+
+function addToCart(courseId) {
+  const course = getCourseById(courseId);
+  if (!course) return;
+
+  const exists = CART.find(item => item.id === courseId);
+  if (!exists) {
+    CART.push({
+      id: course.id,
+      title: course.title,
+      price: course.discountPrice || course.originalPrice,
+      image: course.image
+    });
+    saveCart();
+  }
+  toggleCartDrawer();
+}
+
+function removeFromCart(courseId) {
+  CART = CART.filter(item => item.id !== courseId);
+  saveCart();
+}
+
+function updateCartUI() {
+  const countEl = document.getElementById("cartCount");
+  const itemsContainer = document.getElementById("cartItemsList");
+  const subtotalEl = document.getElementById("cartSubtotal");
+
+  if (countEl) countEl.textContent = CART.length;
+
+  if (itemsContainer) {
+    if (CART.length === 0) {
+      itemsContainer.innerHTML = `<p class="text-gray-500 text-center py-8 text-sm">Your cart is empty.</p>`;
+    } else {
+      itemsContainer.innerHTML = CART.map(item => `
+        <div class="flex items-center justify-between bg-black/40 border border-zinc-800 p-3 rounded-lg gap-3">
+          <img src="${encodeImagePath(item.image)}" alt="${item.title}" class="w-12 h-12 object-cover rounded" />
+          <div class="flex-1 min-w-0">
+            <h5 class="text-xs font-bold text-white truncate">${item.title}</h5>
+            <span class="text-yellow-400 font-semibold text-xs">${money(item.price)}</span>
+          </div>
+          <button onclick="removeFromCart('${item.id}')" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 bg-red-500/10 rounded">
+            Remove
+          </button>
+        </div>
+      `).join("");
+    }
+  }
+
+  const total = CART.reduce((acc, item) => acc + Number(item.price), 0);
+  if (subtotalEl) subtotalEl.textContent = money(total);
+}
+
+function proceedToCheckout() {
+  if (CART.length === 0) {
+    alert("Your cart is empty!");
+    return;
+  }
+  // Redirect to first course or checkout form
+  const firstItem = CART[0];
+  window.location.href = `course.html?id=${encodeURIComponent(firstItem.id)}`;
+}
+
 function courseCard(c) {
   const badgeText = c.badge || "50% OFF";
   return `
@@ -112,12 +189,19 @@ function courseCard(c) {
       <p class="muted" style="margin:0;">${c.outcome || ""}</p>
     </div>
 
-    <div class="priceRow">
+    <div class="priceRow flex items-center justify-between mt-4">
       <div class="price">
         <span class="old">${money(c.originalPrice)}</span>
         <span class="new">${money(c.discountPrice)}</span>
       </div>
-      <a class="btn" href="course.html?id=${encodeURIComponent(c.id)}">View</a>
+      <div class="flex gap-2">
+        <button onclick="addToCart('${c.id}')" class="btn bg-zinc-800 hover:bg-zinc-700 text-white text-xs px-3 py-2 rounded-lg">
+          + Cart
+        </button>
+        <a class="btn bg-yellow-500 hover:bg-yellow-400 text-black font-semibold text-xs px-3 py-2 rounded-lg" href="course.html?id=${encodeURIComponent(c.id)}">
+          View
+        </a>
+      </div>
     </div>
   </article>`;
 }
@@ -476,6 +560,7 @@ function boot() {
   handleEnrollSubmit();
   loadPublicCourses();
   loadHomepageReviews();
+  updateCartUI();
 }
 
 document.addEventListener("DOMContentLoaded", boot);
