@@ -42,7 +42,13 @@ window.handleAdminLogout = async function() {
 
 window.toggleCourseForm = function() {
   const form = document.getElementById('course-form');
-  if (form) form.classList.toggle('hidden');
+  if (form) {
+    form.classList.toggle('hidden');
+    // Clear edit state
+    delete form.dataset.editId;
+    form.querySelector('button[type="submit"]').textContent = "Save Course";
+    form.reset();
+  }
 };
 
 window.switchTab = function(tabName) {
@@ -125,6 +131,7 @@ async function loadTabData(tab) {
         loadReviewsManager(sb);
         break;
       case "courses":
+        loadCategoriesDropdown(sb);
         loadCoursesAdmin(sb);
         break;
       case "categories":
@@ -150,7 +157,7 @@ async function loadDashboardMetrics(sb) {
   }, 0) || 0;
 
   if (document.getElementById("metric-revenue")) {
-    document.getElementById("metric-revenue").textContent = "BDT " + totalRevenue.toLocaleString();
+    document.getElementById("metric-revenue").textContent = "৳" + totalRevenue.toLocaleString();
   }
   if (document.getElementById("metric-orders")) {
     document.getElementById("metric-orders").textContent = enrollments?.length || 0;
@@ -178,7 +185,7 @@ async function loadEnrollments(sb) {
       <td class="p-3">${item.email || 'N/A'}</td>
       <td class="p-3">${item.phone || 'N/A'}</td>
       <td class="p-3 text-yellow-400">${item.course_title || item.course_id}</td>
-      <td class="p-3">${item.payment_method || 'N/A'} (${item.transaction_id || 'No TxID'})</td>
+      <td class="p-3">৳${Number(item.price_discount || 0).toLocaleString()}</td>
     </tr>
   `).join('');
 }
@@ -335,9 +342,19 @@ async function loadCategoriesList(sb) {
         <h4 class="font-bold text-white">${cat.name}</h4>
         <p class="text-xs text-yellow-500 font-mono">slug: ${cat.slug}</p>
       </div>
+      <button onclick="deleteCategory('${cat.id}')" class="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded">Delete</button>
     </div>
   `).join("");
 }
+
+window.deleteCategory = async function(id) {
+  const sb = safeGetSupabase();
+  if (!sb) return;
+  if (confirm("Delete this category?")) {
+    await sb.from("categories").delete().eq("id", id);
+    loadCategoriesList(sb);
+  }
+};
 
 document.getElementById("category-form")?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -356,15 +373,27 @@ document.getElementById("category-form")?.addEventListener("submit", async (e) =
     document.getElementById("category-form").reset();
     document.getElementById("category-form").classList.add("hidden");
     loadCategoriesList(sb);
+    loadCategoriesDropdown(sb);
   }
 });
 
-// 7. Manage Courses
+async function loadCategoriesDropdown(sb) {
+  const select = document.getElementById("course-category");
+  if (!select) return;
+  const { data: categories } = await sb.from("categories").select("*");
+  if (!categories) return;
+
+  select.innerHTML = `<option value="">Select Category</option>` + categories.map(cat => `
+    <option value="${cat.id}">${cat.name}</option>
+  `).join("");
+}
+
+// 7. Manage Courses & Live Editing
 async function loadCoursesAdmin(sb) {
   const container = document.getElementById('courses-list');
   if (!container) return;
 
-  const { data, error } = await sb.from('courses').select('*').order('created_at', { ascending: false });
+  const { data, error } = await sb.from('courses').select('*, categories(name)').order('created_at', { ascending: false });
 
   if (error || !data || !data.length) {
     container.innerHTML = `<p class="text-gray-500 col-span-2">No courses found in database. Click "Import Local Courses" above.</p>`;
@@ -375,14 +404,42 @@ async function loadCoursesAdmin(sb) {
     <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex justify-between items-center">
       <div>
         <h3 class="font-bold text-white">${course.title}</h3>
-        <p class="text-xs text-yellow-400 font-mono">৳${course.price} | Slug: ${course.slug}</p>
+        <p class="text-xs text-yellow-400 font-mono">৳${course.price} | Slug: ${course.slug} ${course.categories?.name ? `| Category: <b>${course.categories.name}</b>` : ''}</p>
       </div>
-      <button onclick="deleteCourse('${course.id}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white text-xs px-3 py-1.5 rounded transition">
-        Delete
-      </button>
+      <div class="flex gap-2">
+        <button onclick="editCourse('${course.id}')" class="bg-zinc-800 hover:bg-zinc-700 text-white text-xs px-3 py-1.5 rounded transition">
+          Edit
+        </button>
+        <button onclick="deleteCourse('${course.id}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white text-xs px-3 py-1.5 rounded transition">
+          Delete
+        </button>
+      </div>
     </div>
   `).join('');
 }
+
+window.editCourse = async function(id) {
+  const sb = safeGetSupabase();
+  if (!sb) return;
+
+  const { data: course, error } = await sb.from('courses').select('*').eq('id', id).single();
+  if (error || !course) return alert("Course not found");
+
+  document.getElementById('course-title').value = course.title;
+  document.getElementById('course-slug').value = course.slug;
+  document.getElementById('course-price').value = course.price;
+  document.getElementById('course-thumb').value = course.thumbnail_url || '';
+  document.getElementById('course-desc').value = course.description || '';
+  if (document.getElementById('course-category')) {
+    document.getElementById('course-category').value = course.category_id || '';
+  }
+
+  const form = document.getElementById('course-form');
+  form.dataset.editId = course.id;
+  form.querySelector('button[type="submit"]').textContent = "Update Course";
+  form.classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 window.deleteCourse = async function(id) {
   const sb = safeGetSupabase();
@@ -393,6 +450,49 @@ window.deleteCourse = async function(id) {
     if (!error) loadCoursesAdmin(sb);
   }
 };
+
+// Course Form Submit Handler (Handles both Create and Edit with auto-database sync)
+document.getElementById('course-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const sb = safeGetSupabase();
+  if (!sb) return;
+
+  const form = e.target;
+  const editId = form.dataset.editId;
+
+  const title = document.getElementById('course-title').value;
+  const slug = document.getElementById('course-slug').value;
+  const price = parseFloat(document.getElementById('course-price').value);
+  const thumbnail_url = document.getElementById('course-thumb').value;
+  const description = document.getElementById('course-desc').value;
+  const category_id = document.getElementById('course-category')?.value || null;
+
+  let error;
+  if (editId) {
+    // Update existing course in database
+    const res = await sb.from('courses').update({
+      title, slug, price, original_price: price, thumbnail_url, description, category_id
+    }).eq('id', editId);
+    error = res.error;
+  } else {
+    // Insert new course into database
+    const res = await sb.from('courses').insert([{
+      title, slug, price, original_price: price, thumbnail_url, description, category_id, is_published: true
+    }]);
+    error = res.error;
+  }
+
+  if (error) {
+    alert('Error saving course: ' + error.message);
+  } else {
+    alert(editId ? 'Course updated successfully!' : 'Course added successfully!');
+    form.reset();
+    delete form.dataset.editId;
+    form.querySelector('button[type="submit"]').textContent = "Save Course";
+    toggleCourseForm();
+    loadCoursesAdmin(sb);
+  }
+});
 
 // 8. Contact Messages
 async function loadMessages(sb) {
@@ -416,7 +516,6 @@ async function loadMessages(sb) {
   `).join('');
 }
 
-// Main Dashboard Initialization
 document.addEventListener('DOMContentLoaded', async () => {
   await guardAdminAccess();
   switchTab("dashboard");
