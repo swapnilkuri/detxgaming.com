@@ -29,8 +29,7 @@ window.DETX = {
     shortsPlaylistId: "PL2gip3RqVaHdB5EBHCt1SPG_4ifssHVIT",
     livePlaylistId: "PL2gip3RqVaHfKpGTDwUsNpjsT5wRRcf_6",
   },
-
-  courses: [
+courses: [
     {
       id: "yt-journey-starter",
       track: "YouTube Starter",
@@ -62,7 +61,7 @@ window.DETX = {
       title: "YouTube SEO for Gaming (ChatGPT + VidIQ style)",
       image: "/assets/courses/youtube-seo-mastery.png",
       outcome: "Get searchable titles, tags, descriptions that pull views.",
-      description: "Practical SEO: keywords, packaging, retention basics, and the AI workflow you’ll use daily.",
+      description: "Practical SEO: keywords, packaging, retention basics, and the AI workflow you'll use daily.",
       originalPrice: 1599,
       discountPrice: 799,
       includes: [
@@ -186,6 +185,7 @@ window.DETX = {
       checkoutUrl: "https://PAYHIP_OR_GUMROAD_LINK_HERE"
     },
   ],
+ 
 
   shop: {
     affiliateNote: "Affiliate shop: if you buy from these links, Detx Gaming may earn a commission (no extra cost to you).",
