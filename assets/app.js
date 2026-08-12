@@ -4,7 +4,7 @@ function qs(sel, root = document) { return root.querySelector(sel); }
 function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
 
 function money(n) {
-  return "₹" + Number(n || 0).toLocaleString("en-US");
+  return "৳" + Number(n || 0).toLocaleString("en-US");
 }
 
 function setYear() {
@@ -164,7 +164,6 @@ function proceedToCheckout() {
     alert("Your cart is empty!");
     return;
   }
-  // Redirect to first course or checkout form
   const firstItem = CART[0];
   window.location.href = `course.html?id=${encodeURIComponent(firstItem.id)}`;
 }
@@ -322,7 +321,7 @@ async function handleEnrollSubmit() {
 
     try {
       const sb = safeGetSupabase();
-      if (!sb) throw new Error("Supabase is not initialized. Please check your config.");
+      if (!sb) throw new Error("Supabase is not initialized.");
 
       const payload = {
         course_id: form.dataset.courseId,
@@ -362,7 +361,7 @@ async function handleEnrollSubmit() {
       setTimeout(() => { window.location.href = "success.html"; }, 500);
     } catch (err) {
       console.error(err);
-      if (status) status.textContent = "❌ Failed. Check Supabase keys/RLS or try again.";
+      if (status) status.textContent = "❌ Failed. Check Supabase keys or try again.";
     }
   });
 }
@@ -497,7 +496,7 @@ async function loadPublicCourses() {
         <h3 class="text-xl font-bold text-white mb-2">${course.title}</h3>
         <p class="text-sm text-gray-400 mb-4 line-clamp-2">${course.description}</p>
         <div class="flex justify-between items-center">
-          <span class="text-yellow-400 font-bold text-lg">${money(course.price)}</span>
+          <span class="text-yellow-400 font-bold text-lg">৳${Number(course.price).toLocaleString()}</span>
           <a href="course.html?id=${course.slug}" class="bg-yellow-500 text-black font-semibold px-4 py-2 rounded-lg text-sm hover:bg-yellow-400 transition">
             View Details
           </a>
